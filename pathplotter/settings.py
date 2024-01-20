@@ -129,7 +129,7 @@ if os.environ.get('DEV') == "false":
     CSRF_TRUSTED_ORIGINS = [root, os.path.join(root, "set-version")]
     # CSRF_TRUSTED_ORIGINS = ["*"]
 
-    STATIC_ROOT = BASE_DIR / "staticfiles"
+    # STATIC_ROOT = BASE_DIR / "staticfiles"
 
 else:
 
@@ -148,6 +148,8 @@ else:
             'PORT': os.environ.get("DBPORT"),
         }
     }
+
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 STATIC_URL = "static/"
 
