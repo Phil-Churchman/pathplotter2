@@ -149,7 +149,7 @@ else:
         }
     }
 
-STATIC_ROOT = BASE_DIR / "staticfiles"
+
 
 STATIC_URL = "static/"
 
@@ -216,3 +216,5 @@ LOGOUT_REDIRECT_URL = "/"
 
 # if 'WEBSITE_HOSTNAME' in os.environ: # Running on Azure
 #     from .azure import *
+
+STATIC_ROOT = BASE_DIR / "staticfiles"
