@@ -1,0 +1,42 @@
+{% extends "master.html" %}
+
+{% block title %}
+    <title>Edit group</title>
+{% endblock %}
+{% block submenu %}
+
+<div>
+  <nav class="navbar navbar-expand-lg bg-light" id="network_nav">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">Edit group</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">       
+        </ul>
+      </div>
+    </div>
+  </nav>
+  </div>
+
+{% endblock %}
+{% block content %}
+<div class="container">
+<p></p>
+<a>Loops:</a>
+<ul style="list-style: none; text-align: left;">
+{% for x in loops %}
+<li><a href="/edit-loop/{{x.id}}" class="link-offset-2 link-underline link-underline-opacity-0">{{x}}</a></li>
+{% endfor %}
+</ul>
+<p></p>
+
+<form action="/edit-group/{{id}}" method="post">
+  {%csrf_token%}
+  {%if form%}
+  {% include 'partials/object_form.html' %} 
+  {%endif%}
+</form>
+</div>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends "master.html" %}
+
+{% block title %}
+    <title>Upload Link CSV file</title>
+{% endblock %}
+
+{% block submenu %}
+
+<div>
+  <nav class="navbar navbar-expand-lg bg-light" id="network_nav">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">Upload Link CSV file</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+   
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  </div>
+
+{% endblock %}
+
+{% block content %}
+<p></p>
+  <form method="post" action="/upload-link-csv/" enctype="multipart/form-data">
+    <div>
+    {% csrf_token %}
+    <input class="form-control mb-3" type="file" name="myfile" accept=".csv">
+    <div class="mb-3">
+      <label for="mincount" class="form-label">Minimum number of votes</label>
+      <input type="number" min="1" step="1" value="1" class="form-control" id="mincount" name="mincount">
+    </div>
+
+  <div class="form-group col-12" >
+    <input type="submit" class="btn btn-primary mt-3" value="Save"/>
+  </div>
+
+</div>
+</form>
+
+
+
+{% endblock %}
+

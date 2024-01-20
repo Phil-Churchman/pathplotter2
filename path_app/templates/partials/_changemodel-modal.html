@@ -1,0 +1,30 @@
+{% load static%}
+
+<script>
+  function changeModel() {
+    if (document.querySelector("#changemodelDialog") == null) {
+      var modalLoading =
+
+          '<div class="modal fade" id="changemodelDialog" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">\
+            <div class="modal-dialog">\
+                <div class="modal-content">\
+                    <div class="modal-header">\
+                        <h4 class="modal-title">Too many loops</h4>\
+                    </div>\
+                    <div class="modal-body">\
+                        <div">\
+                          <p>"Model choice" in network settings changed to "Efficient".</p>\
+                        </div>\
+                    </div>\
+                </div>\
+            </div>\
+        </div>';
+      $(document.body).append(modalLoading);
+    }
+    if (document.querySelector("#changeModel") != null) {
+    $("#changemodelDialog").modal("show");
+  }
+}
+
+
+</script>

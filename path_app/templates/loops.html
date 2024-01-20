@@ -1,0 +1,122 @@
+{% extends "master.html" %}
+
+{% block title %}
+    <title>Loops</title>
+{% endblock %}
+{% block submenu %}
+
+
+<div>
+  <nav class="navbar navbar-expand-lg bg-light" id="network_nav">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">Loops</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              {{model}}
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="/edit-param/network/Model_choice/AC/" onclick="showPleaseWait()">Accurate</a></li>
+              <li><a class="dropdown-item" href="/edit-param/network/Model_choice/EF/" onclick="showPleaseWait()">Efficient</a></li>
+            </ul>
+          </li>
+          <!-- <li class="nav-item">
+            <a class="nav-link" aria-current="page" href="/loops/" onclick="showPleaseWait()">Update loops</a>
+          </li>  -->
+        </ul>
+      </div>
+    </div>
+  </nav>
+  </div>
+
+
+
+{% endblock %}
+{% block content %}
+
+<div class="container">
+  <p></p>
+  <form method="post" action="/enabled_loops_only/"> 
+    <a>Enabled loops only: </a>
+    {% csrf_token %} 
+  <div class="form-check form-switch">
+    {% if enabled_loops_only %}
+    <!-- <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" onchange=this.form.submit() checked> -->
+    <!-- <input class="form-check-input" id="flexSwitchCheckDefault" type="checkbox" value="{{x.id}}" onchange=this.form.requestSubmit() checked > -->
+    <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" name="enabled_loop_switch" value='checked' onchange="showPleaseWait(); saveEnabledOnly(this.value)" checked>
+    {% else %}
+    <!-- <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" onchange=this.form.submit()> -->
+    <!-- <input class="form-check-input" id="flexSwitchCheckDefault" type="checkbox" value="{{x.id}}" onchange=this.form.requestSubmit()> -->
+    <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" name="enabled_loop_switch" value='unchecked' onchange="showPleaseWait(); saveEnabledOnly(this.value)">
+    {% endif %}
+  </div>
+</div>
+</form>
+
+
+<table class="table table-borderless align-middle w-auto mt-3">
+  <thead>
+    <tr>
+  
+  <th scope="col"  style="width: 300px">Loop</th>
+  <th scope="col" class="text-center">Group</th>
+  <th scope="col"></th>
+  </tr>
+</thead>
+<tbody>
+{% for x in loops %}
+<tr>
+  <td>
+    <a>{{x.loop_code}}</a>
+    </td>
+    <td>
+      <div class="container" style="align-items: center;">
+        <form method="post" id="group_loop{{x.id}}">
+          <div class="form-check form-switch">
+            {% if x.group %}
+            <!-- <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" onchange=this.form.submit() checked> -->
+            <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" value='{"id": {{x.id}}}' onchange="saveGroup(this.value)" checked>
+            {% else %}
+            <!-- <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" onchange=this.form.submit()> -->
+            <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" value='{"id": {{x.id}}}' onchange="saveGroup(this.value)">
+            {% endif %}
+          </div>
+        </form>
+      </div>
+    </td>
+
+<!-- <td ><form action="/rename-node/" method="post">
+  {% csrf_token %}
+
+  <div class="input-group mb-3">
+    <input type="hidden" id="node_id" type="text" name="node_id" value={{x.id}}>
+    <input id="node_rename" type="text" class="form-control" name="node_rename" value="{{x.node_text}}">
+  <button type="submit" class="btn btn-secondary btn-sm">Rename</button>
+</div>
+</form></td> -->
+
+<td class="text-center"><form action="/edit-loop/{{x.id}}" onsubmit="showPleaseWait()">
+  <!-- <button type="submit" class="btn btn-secondary btn-sm">Edit</button> -->
+  <input type="image" name="submit" src="/static/icons/pencil.svg" alt="Submit" style="width:20px;height:auto;"/>
+
+</form></td>
+
+
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+<p></p>
+</div>
+
+
+{% if modal %}
+<div id="changeModel"></div>
+{%endif%}
+
+{% endblock %}

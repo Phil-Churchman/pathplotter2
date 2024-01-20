@@ -1,0 +1,144 @@
+{% extends "master.html" %}
+
+{% block script %}
+{% load static %}
+<script src="{% static '/js/legend_script.js' %}"></script>
+<script src="{% static '/js/gantt_script.js' %}"></script>
+{% endblock %}
+
+{% block title %}
+    <title>Gantt</title>
+{% endblock %}
+
+{% block submenu %}
+<div>
+<nav class="navbar navbar-expand-lg bg-light" id="gantt_nav">
+  <div class="container-fluid">
+    <a class="navbar-brand sub-brand" id="gantt_brand" href="#">Gantt</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            {{model}}
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="/../edit-param/network/Model_choice/AC/" onclick="showPleaseWait()">Accurate</a></li>
+            <li><a class="dropdown-item" href="/../edit-param/network/Model_choice/EF/" onclick="showPleaseWait()">Efficient</a></li>
+          </ul>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            {{enabled}}
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="/../edit-param/gantt/Enabled_only/False/" onclick="showPleaseWait()">All</a></li>
+            <li><a class="dropdown-item" href="/../edit-param/gantt/Enabled_only/True/" onclick="showPleaseWait()">Enabled only</a></li>
+          </ul>
+        </li>
+        {% if accurate %}
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            {{groups}}
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="/edit-param/gantt/Apply_groups/False/" onclick="showPleaseWait()">No groups</a></li>
+            <li><a class="dropdown-item" href="/edit-param/gantt/Apply_groups/True/" onclick="showPleaseWait()">Groups</a></li>
+          </ul>
+        </li>
+        {% endif %}
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Durations
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" onclick="changeParam('gantt', 'Durations', 'Without durations'); getGantt('{{gantt_data}}')">No durations</a></li>
+            <li><a class="dropdown-item" onclick="changeParam('gantt', 'Durations', 'With durations'); getGantt('{{gantt_data}}')">Durations</a></li>
+          </ul>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Timing
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" onclick="changeParam('gantt', 'Timing', 'Earliest'); getGantt('{{gantt_data}}')">Earliest</a></li>
+            <li><a class="dropdown-item" onclick="changeParam('gantt', 'Timing', 'Latest'); getGantt('{{gantt_data}}')">Latest</a></li>
+          </ul>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Order
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" onclick="changeParam('gantt', 'Order_by', 'Category'); getGantt('{{gantt_data}}')">Category</a></li>
+            <li><a class="dropdown-item" onclick="changeParam('gantt', 'Order_by', 'Time'); getGantt('{{gantt_data}}')">Time</a></li>
+          </ul>
+        </li>        
+        
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Out sequence
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" onclick="changeParam('gantt', 'Show_out_seq', true); getGantt('{{gantt_data}}')">Show</a></li>
+            <li><a class="dropdown-item" onclick="changeParam('gantt', 'Show_out_seq', false); getGantt('{{gantt_data}}')">Hide</a></li>
+          </ul>
+        </li>
+        <!-- <li class="nav-item">
+          <a class="nav-link" aria-current="page" href="/edit-gantt-params/">Settings</a>
+        </li>    -->
+
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Other
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="/gantt/0/" onclick="exportSVG('gantt')">Export image</a></li>
+            <li><a class="dropdown-item" href="/update_loops/" onclick="showPleaseWait()">Update loops</a></li>
+          </ul>  
+        </li>
+        {% if accurate %}
+        {% if gantt_tot != 1 %}
+        {% if gantt_num != 0 %}
+        <li class="nav-item">
+          <a class="nav-link" href="/gantt/{{ gantt_num|add:-1 }}/" onclick="showPleaseWait()">Prev.</a>
+        </li>
+        {% else %}
+        <li class="nav-item">
+          <a class="nav-link" href="/gantt/{{ gantt_tot|add:-1 }}/" onclick="showPleaseWait()">Prev.</a>
+        </li>        
+        {% endif %} 
+        <li class="nav-item">
+          <a class="nav-link" href="/gantt/{{ gantt_num|add:1 }}/" onclick="showPleaseWait()">Next</a>
+        </li>   
+        {% endif %} 
+        {% endif %}    
+      </ul>
+    </div>
+  </div>
+</nav>
+</div>
+{% endblock %}
+
+{% block content %}
+{% if accurate %}
+  <h6 class="mt-2">{{ gantt_num|add:1 }} of {{ gantt_tot}}</h6>
+
+  {% endif %} 
+  <svg id="gantt" width="1000" height="1000" onload="getGantt('{{gantt_data}}'), makeSelectable(evt, '{{node_id_dict}}', '{{group_id_dict}}')">
+    <defs>
+      <marker id="arrowheadindianred" markerWidth="10" markerHeight="8" refX="10" refY="4" orient="auto" fill="indianred">
+        <polygon points="0 0, 10 4, 0 8" />
+      </marker>
+      <marker id="arrowheadindianrednooffset" markerWidth="10" markerHeight="8" refX="10" refY="4" orient="auto" fill="indianred">
+        <polygon points="0 0, 10 4, 0 8" />
+      </marker>
+    </defs>
+</svg>
+{% if modal %}
+<div id="changeModel"></div>
+{%endif%}
+{% endblock %}

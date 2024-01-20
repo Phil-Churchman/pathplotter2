@@ -1,0 +1,140 @@
+{
+  "class": "Survey",
+  "id": 1128236,
+  "internal_title": "Add dependencies simple",
+  "l10n": "en_GB",
+  "runs": [
+    {
+      "class": "SurveyRun",
+      "alert_frequency": 0,
+      "alert_last_update": 0,
+      "contact_message": "<p>For questions relating to this survey, <strong>please contact</strong> [CONTACT-PERSON]</p>",
+      "discourage_search_engines": true,
+      "expected_responses": 100,
+      "external_title": "Add dependencies simple",
+      "id": 1128218,
+      "login_message": "Please sign in below using the credentials supplied to you",
+      "notification_invite_body": "Dear [EMAIL]\nAn online survey has been created for you to complete.\n\n[CUSTOM_URL]\n\n- Online surveys Team",
+      "notification_invite_subject": "You have been sent a survey to complete",
+      "notification_reminder_body": "Dear [EMAIL]\nWe have not yet detected your response to our survey.\n\n[CUSTOM_URL]\n\n- Online surveys Team",
+      "notification_reminder_subject": "Survey completion reminder",
+      "permit_back_forth": true,
+      "permit_finish_later": false,
+      "permit_response_printout": false,
+      "short_name": "add-dependencies-simple",
+      "show_completion_receipt": false,
+      "show_numbering": false,
+      "show_progress": false,
+      "timezone": 346
+    }
+  ],
+  "top_container": {
+    "class": "Container",
+    "data_question_visibility": "show",
+    "id": 85857092,
+    "label": "b85117922",
+    "mandatory": "False",
+    "children": [
+      {
+        "class": "Page",
+        "data_question_visibility": "show",
+        "id": 85857093,
+        "label": "b85117923",
+        "mandatory": "False",
+        "title": "Page 1",
+        "children": [
+          {
+            "class": "FreeText",
+            "data_question_visibility": "show",
+            "displayOptionality": true,
+            "format": "single",
+            "id": 85857095,
+            "is_other": false,
+            "label": "b85117926",
+            "mandatory": "True",
+            "show_hints": true,
+            "size": 35,
+            "text": "Please enter name",
+            "q_no": "1"
+          },
+          {
+            "class": "MultipleChoice",
+            "data_question_visibility": "show",
+            "displayLegend": false,
+            "displayOptionality": true,
+            "has_logic": false,
+            "has_other": false,
+            "id": 85857099,
+            "label": "b85118009",
+            "layout": "down",
+            "mandatory": "False",
+            "text": "Please select item that must happen first",
+            "q_no": "2",
+            "options": [
+              {
+                "class": "SelectionOption",
+                "id": 206387387,
+                "is_not_applicable": false,
+                "is_other": false,
+                "screen_to_message": false,
+                "text": "Option 1",
+                "value": 39
+              },
+              {
+                "class": "SelectionOption",
+                "id": 206387395,
+                "is_not_applicable": false,
+                "is_other": false,
+                "screen_to_message": false,
+                "text": "Option 2",
+                "value": 41
+              }
+            ]
+          },
+          {
+            "class": "MultipleChoice",
+            "data_question_visibility": "show",
+            "displayLegend": false,
+            "displayOptionality": true,
+            "has_logic": false,
+            "has_other": false,
+            "id": 85857156,
+            "label": "b85857156",
+            "layout": "down",
+            "mandatory": "False",
+            "text": "Please select item that must happen second",
+            "q_no": "3",
+            "options": [
+              {
+                "class": "SelectionOption",
+                "id": 206387512,
+                "is_not_applicable": false,
+                "is_other": false,
+                "screen_to_message": false,
+                "text": "Option 1",
+                "value": 39
+              },
+              {
+                "class": "SelectionOption",
+                "id": 206387513,
+                "is_not_applicable": false,
+                "is_other": false,
+                "screen_to_message": false,
+                "text": "Option 2",
+                "value": 41
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "class": "Page",
+        "data_question_visibility": "show",
+        "id": 85857094,
+        "label": "b85117924",
+        "mandatory": "False",
+        "title": "Final page"
+      }
+    ]
+  }
+}

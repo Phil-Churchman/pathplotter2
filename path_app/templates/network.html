@@ -1,0 +1,152 @@
+{% extends "master.html" %}
+
+{% block script %}
+{% load static %}
+<script src="{% static '/js/legend_script.js' %}"></script>
+<script src="{% static '/js/network_script.js' %}"></script>
+{% endblock %}
+
+{% block title %}
+<title>Network</title>
+{% endblock %}
+
+{% block submenu %}
+<div>
+<nav class="navbar navbar-expand-lg bg-light" id="network_nav">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">Network</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item active dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            {{enabled}}
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="../edit-param/network/Enabled_select/All/">All</a></li>
+            <li><a class="dropdown-item" href="../edit-param/network/Enabled_select/Enabled_only/">Enabled only</a></li>
+            <li><a class="dropdown-item" href="../edit-param/network/Enabled_select/Disabled_only/">Disabled only</a></li>
+          </ul>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Auto-layout
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="../layout/network/" onclick="showPleaseWait()">Network</a></li>
+            <li><a class="dropdown-item" href="../layout/columns/" onclick="showPleaseWait()">Columns</a></li>
+            <li><a class="dropdown-item" href="../layout/links/" onclick="showPleaseWait()">Links only</a></li>
+          </ul>
+        
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Links
+          </a>
+          <!-- <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="../edit-param/network/Hide_links/False/">Show</a></li>
+            <li><a class="dropdown-item" href="../edit-param/network/Hide_links/True/">Hide</a></li>
+          </ul> -->
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" onclick="changeParam('network', 'Hide_links', false); getNetwork('{{network_data}}', '{{ colour_ref }}', '{{ conn_to_goal_legend }}')">Show</a></li>
+            <li><a class="dropdown-item" onclick="changeParam('network', 'Hide_links', true); getNetwork('{{network_data}}', '{{ colour_ref }}', '{{ conn_to_goal_legend }}')">Hide</a></li>
+          </ul>  
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Link midpoints
+          </a>
+          <!-- <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="../edit-param/network/Link_midpoints/True/">Show</a></li>
+            <li><a class="dropdown-item" href="../edit-param/network/Link_midpoints/False/">Hide</a></li>
+          </ul> -->
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" onclick="changeParam('network', 'Link_midpoints', true); getNetwork('{{network_data}}', '{{ colour_ref }}', '{{ conn_to_goal_legend }}')">Show</a></li>
+            <li><a class="dropdown-item" onclick="changeParam('network', 'Link_midpoints', false); getNetwork('{{network_data}}', '{{ colour_ref }}', '{{ conn_to_goal_legend }}')">Hide</a></li>
+          </ul>  
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Labels
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" onclick="changeParam('network', 'Labels', 'No labels'); getNetwork('{{network_data}}', '{{ colour_ref }}', '{{ conn_to_goal_legend }}')">No labels</a></li>
+            <li><a class="dropdown-item" onclick="changeParam('network', 'Labels', 'Short labels'); getNetwork('{{network_data}}', '{{ colour_ref }}', '{{ conn_to_goal_legend }}')">Short labels</a></li>
+            <li><a class="dropdown-item" onclick="changeParam('network', 'Labels', 'Full labels'); getNetwork('{{network_data}}', '{{ colour_ref }}', '{{ conn_to_goal_legend }}')">Full labels</a></li>
+          </ul>  
+        </li> 
+    
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Align
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" onclick="align('top')">Top</a></li>
+            <li><a class="dropdown-item" onclick="align('bottom')">Bottom</a></li>
+            <li><a class="dropdown-item" onclick="align('left')">Left</a></li>
+            <li><a class="dropdown-item" onclick="align('right')">Right</a></li>
+            <li><a class="dropdown-item" onclick="align('horizontal')">Horizontal dist.</a></li>
+            <li><a class="dropdown-item" onclick="align('vertical')">Vertical dist.</a></li>
+          </ul>  
+        </li>
+
+        {% if loop_options %}
+ 
+
+        {% endif %}    
+
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Selection
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#" onclick="clearSelection()">Clear selection</a></li>
+            <li><a class="dropdown-item" href="#" onclick="delSelection()">Delete selection</a></li>
+          </ul>  
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Other
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="/network/" onclick="exportSVG('network')">Export image</a></li>
+            <li><a class="dropdown-item" href="/update_loops/" onclick="showPleaseWait()">Update loops</a></li>
+            <li><a class="dropdown-item" href="/disable_redundant/" onclick="showPleaseWait()">Disable redundant</a></li>
+          </ul>  
+        </li>
+
+      </ul>
+    </div>
+  </div>
+</nav>
+</div>
+{% endblock %}
+
+{% block content %}
+
+<svg id="network" width="{{plot_width}}" height="{{svg_height}}" onload="getNetwork('{{network_data}}', '{{ colour_ref }}', '{{ conn_to_goal_legend }}', '{{ legend_loop }}', '{{ legend_group }}'), makeDraggable(evt, '{{ params }}')">
+  <defs>
+    <marker id="arrowheadlightgrey" markerWidth="10" markerHeight="8" refX="19" refY="4" orient="auto" fill="lightgrey" pointer-events="none">
+      <polygon points="0 0, 10 4, 0 8" />
+    </marker>
+    <marker id="arrowheadcornflowerblue" markerWidth="10" markerHeight="8" refX="19" refY="4" orient="auto" fill="cornflowerblue" pointer-events="none">
+      <polygon points="0 0, 10 4, 0 8" />
+    </marker>   
+    <marker id="arrowheadburlywood" markerWidth="10" markerHeight="8" refX="19" refY="4" orient="auto" fill="burlywood" pointer-events="none">
+      <polygon points="0 0, 10 4, 0 8" />
+    </marker>
+    <marker id="arrowheadcornflowerbluenooffset" markerWidth="10" markerHeight="8" refX="10" refY="4" orient="auto" fill="cornflowerblue" pointer-events="none">
+      <polygon points="0 0, 10 4, 0 8" />
+    </marker>   
+    <marker id="arrowheadburlywoodnooffset" markerWidth="10" markerHeight="8" refX="10" refY="4" orient="auto" fill="burlywood" pointer-events="none">
+      <polygon points="0 0, 10 4, 0 8" />
+    </marker>
+  </defs>
+</svg>
+{% if modal %}
+<div id="changeModel"></div>
+{%endif%}
+
+{% endblock %}

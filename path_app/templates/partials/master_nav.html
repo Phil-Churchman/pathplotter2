@@ -1,0 +1,88 @@
+
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark" id="top_nav">
+    <div class="container-fluid">
+      <a class="navbar-brand" id="master_brand" href="#">Pathplotter</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTopContent" aria-controls="navbarTopContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarTopContent">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item dropdown">
+            <a class="nav-link active dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              User
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" >Hi {{ user.username }}!</a></li>
+              <li><a class="dropdown-item" onclick="showPleaseWait()" href="{% url 'change_password' %}">Change password</a></li>
+              <li><a class="dropdown-item" onclick="showPleaseWait()" href="{% url 'logout' %}">Logout</a></li>
+            </ul>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="/versions/" onclick="showPleaseWait()">Versions</a>
+          </li>
+        
+          {% if version_not_selected %}
+
+        
+          {% else %}
+
+          <li class="nav-item dropdown">
+            <a class="nav-link active dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              File
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="/upload-file/">Import version file (JSON)</a></li>
+              <li><a class="dropdown-item" href="/export-file/">Export version file (JSON)</a></li>
+              <li><a class="dropdown-item" href="/upload-node-csv/">Import node file (CSV)</a></li>
+              <li><a class="dropdown-item" href="/upload-link-csv/">Import link file (CSV)</a></li>
+              <li><a class="dropdown-item" href="/export_survey/full/">Export link survey (JSON)</a></li>
+              <li><a class="dropdown-item" href="/export_survey/simple/">Export simple link survey (JSON)</a></li>
+              <li><a class="dropdown-item" href="/export_enabled_nodes/">Export enabled nodes (CSV)</a></li>
+              <li><a class="dropdown-item" href="/export_link_analysis/">Export link analysis (CSV)</a></li>
+            </ul>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" onclick="showPleaseWait()" aria-current="page" href="/categories/">Categories</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" onclick="showPleaseWait()" aria-current="page" href="/nodes/all/">Nodes</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" onclick="showPleaseWait()" aria-current="page" href="/links/">Links</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" onclick="showPleaseWait()" aria-current="page" href="/loops/">Loops</a>
+          </li>
+          <li class="nav-item">          
+            <a class="nav-link active" onclick="showPleaseWait()" href="/network/">Network</a>
+          </li>
+          <li class="nav-item">          
+            <a class="nav-link active" onclick="showPleaseWait()" href="/gantt/0/" onclick="showPleaseWait()">Gantt</a>
+          </li>
+
+          <li class="nav-item dropdown">
+            <a class="nav-link active dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Settings
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" onclick="showPleaseWait()" href="/edit-network-params/">Network settings</a></li>
+              <li><a class="dropdown-item" onclick="showPleaseWait()" href="/edit-gantt-params/">Gantt settings</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-item dropdown">
+            <a class="nav-link active dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Other
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="/undo/" onclick="showPleaseWait()">Undo</a></li>
+              <li><a class="dropdown-item" onclick="showPleaseWait()" href="/redo/">Redo</a></li>
+              <li><a class="dropdown-item" href="/enable_all/" onclick="showPleaseWait()">Enable all</a></li>
+            </ul>  
+          </li>
+
+          {% endif %}              
+        </ul>
+      </div>
+    </div>
+  </nav>

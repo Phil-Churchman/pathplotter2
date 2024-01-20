@@ -1,0 +1,29 @@
+{% load static%}
+
+<script>
+  function ganttError(heading, body) {
+    if (document.querySelector("#ganttErrorDialog") == null) {
+      var modalLoading =
+
+          '<div class="modal fade" id="ganttErrorDialog" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">\
+            <div class="modal-dialog">\
+                <div class="modal-content">\
+                    <div class="modal-header">\
+                        <h4 class="modal-title">Cannot create Gantt</h4>\
+                    </div>\
+                    <div class="modal-body">\
+                        <div">\
+                          <p>Gantt requires a minimum of one goal, one non-goal and one link connecting these</p>\
+                        </div>\
+                    </div>\
+                </div>\
+            </div>\
+        </div>';
+      $(document.body).append(modalLoading);
+    }
+    if (document.querySelector("#ganttError") != null) {
+    $("#ganttErrorDialog").modal("show");
+  }
+}
+
+</script>

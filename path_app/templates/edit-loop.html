@@ -1,0 +1,47 @@
+{% extends "master.html" %}
+
+{% block title %}
+    <title>Edit loop</title>
+{% endblock %}
+{% block submenu %}
+
+<div>
+  <nav class="navbar navbar-expand-lg bg-light" id="network_nav">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">Edit loop</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+          <li class="nav-item">
+            <a class="nav-link" aria-current="page" href="#">{{ name }}</a>
+          </li>      
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  </div>
+
+{% endblock %}
+{% block content %}
+<div class="container">
+<p></p>
+<a>Links:</a>
+<ul style="list-style: none; text-align: left;">
+{% for x in links %}
+<li><a href="/edit-link/{{x.id}}" class="link-offset-2 link-underline link-underline-opacity-0">{{ x.from_node }} - {{ x.to_node }}</a></li>
+{% endfor %}
+</ul>
+<p></p>
+
+<form action="/edit-loop/{{id}}" method="post" onsubmit="showPleaseWait()">
+  {%csrf_token%}
+  {%if form%}
+  {% include 'partials/object_form.html' %} 
+  {%endif%}
+</form>
+</div>
+{% endblock %}

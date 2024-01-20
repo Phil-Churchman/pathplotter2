@@ -1,0 +1,30 @@
+{% load static%}
+
+<script>
+  function uploadFail() {
+    if (document.querySelector("#uploadFailDialog") == null) {
+      var uploadFailModal =
+
+          '<div class="modal fade" id="uploadFailDialog" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">\
+            <div class="modal-dialog">\
+                <div class="modal-content">\
+                    <div class="modal-header">\
+                        <h4 class="modal-title">Unsuccessful</h4>\
+                    </div>\
+                    <div class="modal-body">\
+                        <div>\
+                          <p>File did not import successfully.</p>\
+                        </div>\
+                    </div>\
+                </div>\
+            </div>\
+        </div>';
+      $(document.body).append(uploadFailModal);
+    }
+    if (document.querySelector("#uploadFail") != null) {
+    $("#uploadFailDialog").modal("show");
+  }
+}
+
+
+</script>
