@@ -24,8 +24,17 @@
           </li>  
           <li class="nav-item">
             <a class="nav-link" href="/upload-file/">Upload file</a>
-          </li>              
-          
+          </li>
+          {% if version_not_selected %}
+
+        
+          {% else %}
+          {% if standardise %}
+          <li class="nav-item">
+            <a class="nav-link" aria-current="page" href="/standardise_nodes/">Standardise nodes</a>
+          </li>               
+          {% endif %}
+          {% endif %}
         </ul>
       </div>
     </div>
