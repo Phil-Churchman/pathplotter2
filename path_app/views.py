@@ -81,14 +81,15 @@ def versions(request, **kwargs):
         check_db()
     template = loader.get_template('versions.html')
     user = request.user
-    versions = list(Version.objects.filter(user=user, archive=False))
-    versions = sorted(versions,key = lambda x: x.name)
+    versions = Version.objects.filter(user=user, archive=False).order_by("name")
+    # versions = list(Version.objects.filter(user=user, archive=False).order_by("name"))
+    # versions = sorted(versions,key = lambda x: x.name)
     [version, state, currentversion] = current_version(request)
     state = "/versions/"
     if currentversion != None:
         setattr(currentversion, "state", state)
         currentversion.save()
-    form = VersionForm
+    # form = VersionForm
     for i in versions:
         if i == version:
             i.current = True
@@ -107,7 +108,6 @@ def versions(request, **kwargs):
     for i in list(nodes):
         if i.category not in categories:
             i.delete()
-
     try: 
         node_standards = list(set([i.node_standard.code for i in nodes]))
         category_codes = list(set([i.category_code for i in categories]))
@@ -119,11 +119,15 @@ def versions(request, **kwargs):
     except:
         standardise = False
 
+    # standardise = True
+
     context = {
-    'form': form,
+    # 'form': form,
     'standardise': standardise,
     'versions': versions,
     'version_not_selected': not check_version_selected(version),
+    # 'version_not_selected': len(versions) == 0,
+
     'fail_modal': fail_modal,
     'gantt_error_modal': gantt_error_modal,
     }
@@ -847,11 +851,9 @@ def add_link(request):
         form = LinkForm(request.POST, version=version)
         from_node = request.POST.get("from_node")
         to_node = request.POST.get("to_node")
-        # print(from_node, to_node)
         existing = Link.objects.filter(from_node=from_node, to_node=to_node)
         node0 = Node.objects.get(id=from_node)
         node1 = Node.objects.get(id=to_node)
-        print(node0, node1)
         if existing.count() == 0:
             if form.is_valid():
                 form.save()
@@ -1502,6 +1504,21 @@ def export_link_analysis(request):
 @login_required
 def standardise_nodes(request):
     [version, state, currentversion] = current_version(request)
+
+    # try: 
+    #     nodes = list(Node.objects.filter(version=version, enabled=True))
+    #     categories = list(Category.objects.filter(version=version, enabled=True))
+    #     for i in list(nodes):
+    #         if i.category not in categories:
+    #             i.delete()
+    #     node_standards = list(set([i.node_standard.code for i in nodes]))
+    #     category_codes = list(set([i.category_code for i in categories]))
+    #     for i in node_standards:
+    #         if i not in category_codes:
+    #             return HttpResponseRedirect("/versions_fail/")
+    # except:
+    #     return HttpResponseRedirect("/versions_fail/")
+
 
     for i in list(Category.objects.filter(version=version, enabled=False)):
         i.delete()

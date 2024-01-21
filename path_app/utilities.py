@@ -1024,7 +1024,6 @@ def take_snapshot(request):
                 for k in j._meta.fields:
                     if i._meta.get_field(k.name).get_internal_type() == "ForeignKey":
                         if k.name != "copied_to" and k.name != "version":
-                            print(i, j, k)
                             try:
                                 obj[k.name] = getattr(j, k.name).id
                             except:
