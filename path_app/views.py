@@ -107,17 +107,15 @@ def versions(request, **kwargs):
     for i in list(nodes):
         if i.category not in categories:
             i.delete()
-    node_standards = list(set([i.node_standard.code for i in nodes]))
-    category_codes = list(set([i.category_code for i in categories]))
-    print(version)
-    print(node_standards)
-    print(category_codes)
-    standardise = True
-    for i in node_standards:
-        if i not in category_codes:
-            standardise=False
-            break
-    print(standardise)
+    # node_standards = list(set([i.node_standard.code for i in nodes]))
+    # category_codes = list(set([i.category_code for i in categories]))
+    # standardise = True
+    # for i in node_standards:
+    #     if i not in category_codes:
+    #         standardise=False
+    #         break
+    
+    standardise = False
 
     context = {
     'form': form,

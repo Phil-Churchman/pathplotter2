@@ -69,8 +69,8 @@ class Node(models.Model):
     selected = models.BooleanField(default=False)
     connected_to_goal = models.BooleanField(default=True)
     connected_to_goal_enabled = models.BooleanField(default=True)
-    node_standard = models.ForeignKey(NodeStandard, null=True, blank=True, default=get_default_node_standard, on_delete=models.SET_DEFAULT)
-    # node_standard = models.ForeignKey(NodeStandard, null=True, blank=True, on_delete=models.SET_NULL)
+    # node_standard = models.ForeignKey(NodeStandard, null=True, blank=True, default=get_default_node_standard, on_delete=models.SET_DEFAULT)
+    node_standard = models.ForeignKey(NodeStandard, null=True, blank=True, on_delete=models.SET_NULL)
     copied_to = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL)
 
     class Meta:
