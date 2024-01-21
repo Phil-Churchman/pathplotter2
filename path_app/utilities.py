@@ -1024,10 +1024,18 @@ def take_snapshot(request):
                 for k in j._meta.fields:
                     if i._meta.get_field(k.name).get_internal_type() == "ForeignKey":
                         if k.name != "copied_to" and k.name != "version":
-                            obj[k.name] = getattr(j, k.name).id
+                            print(i, j, k)
+                            try:
+                                obj[k.name] = getattr(j, k.name).id
+                            except:
+                                obj[k.name] = None
+                        
                     else:
                         if k.name != "copied_to" and k.name != "version":
-                            obj[k.name] = getattr(j, k.name)
+                            try:
+                                obj[k.name] = getattr(j, k.name)
+                            except:
+                                obj[k.name] = None
 
                 data[i.__name__].append(obj)
         # elif i.__name__ in ["Loop_links"]:

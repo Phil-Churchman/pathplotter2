@@ -632,7 +632,10 @@ def edit_node(request, node_id):
     if request.method == 'POST':
         form = NodeForm(request.POST, instance=instance, version=version)
         if form.is_valid():
-            form.save()
+            new_node = form.save()
+            if new_node.node_standard == None:
+                new_node.node_standard = NodeStandard.objects.get(code="-")
+                new_node.save()
             add_backup(request, "generic")
         return HttpResponseRedirect(state)
     else:
@@ -797,11 +800,12 @@ def add_node(request):
     if request.method == 'POST':
         form = NodeForm(request.POST, version=version)
         if form.is_valid():
-            form.save()
+            new_node = form.save()
+            if new_node.node_standard == None:
+                new_node.node_standard = NodeStandard.objects.get(code="-")
+                new_node.save()
             add_backup(request, "generic")
             return HttpResponseRedirect(state)
-
-
     else:
         form = NodeForm(version=version, initial={"version": version})
     
@@ -819,8 +823,10 @@ def add_node_placed(request, x, y):
     if request.method == 'POST':
         form = NodeForm(request.POST, version=version)
         if form.is_valid():
-            form.save()
-
+            new_node = form.save()
+            if new_node.node_standard == None:
+                new_node.node_standard = NodeStandard.objects.get(code="-")
+                new_node.save()
             add_backup(request, "generic")
             return HttpResponseRedirect("/network/")
         

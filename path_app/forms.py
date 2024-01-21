@@ -103,7 +103,9 @@ class NodeForm(forms.ModelForm):
         super(NodeForm, self).__init__(*args, **kwargs)
         self.fields['version'].queryset = Version.objects.filter(id=version.id)
         self.fields['category'].queryset = Category.objects.filter(version=version)
+        # self.fields['node_standard'].queryset = NodeStandard.objects.filter().exclude(id=None)
         self.fields['duration'].validators.append(val_duration)
+        self.fields['node_standard'].validators.append(not_null)
         # self.fields['weight'].validators.append(val_weight)
         # self.fields['weight'].error_messages={}
         self.fields['duration'].error_messages={"Duration needs to be greater than or equal to zero"}
