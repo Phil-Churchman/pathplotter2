@@ -52,8 +52,8 @@ class NodeStandard(models.Model):
 
 class Node(models.Model):
 
-    def get_default_node_standard():
-        return NodeStandard.objects.get(name="Not defined").id
+    # def get_default_node_standard():
+    #     return NodeStandard.objects.get(name="Not defined").id
 
     version = models.ForeignKey(Version, on_delete=models.CASCADE, default="1")
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
