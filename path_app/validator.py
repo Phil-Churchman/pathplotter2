@@ -25,11 +25,3 @@ def pos_int(value):
             code="invalid",
             params={"value": value}
         )
-  
-def not_null(value):
-    if value in [None]:
-        raise ValidationError(
-            _("Must select a 'Node standard' option"),
-            code="invalid",
-            params={"value": value}
-        )    

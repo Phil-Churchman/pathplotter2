@@ -2117,7 +2117,7 @@ def import_csv(request, importfile):
             continue
 
         if row[0] not in [i.node_text for i in Node.objects.filter(version=version, category=newcat)]:
-            newnode = Node.objects.create(version=version, node_code=countertext, node_text=row[0], category=newcat)
+            newnode = Node.objects.create(version=version, node_code=countertext, node_text=row[0], category=newcat, node_standard=NodeStandard.objects.get(code="-"))
             newnode.save()
 
         if counter1 < len(alphabet) - 1:
