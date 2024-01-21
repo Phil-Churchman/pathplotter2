@@ -1981,13 +1981,13 @@ def goal_connections(request, enabled_only):
 # File import / export
 
 def import_data(import_data, version):
-
+    standard = list(NodeStandard.objects.filter(code="-"))[0]
     for i in import_data["nodes"].keys():
         category = Category.objects.create(category_text=i[i.find(" ")+3:], category_code=i[:i.find(" ")], version=version)
         for j in import_data["nodes"][i]:
             node_code = j[1:j.find(" ")]
             node_text = j[j.find(" ")+3:]
-            node = Node.objects.create(category=category, node_text=node_text, node_code=node_code, version=version)
+            node = Node.objects.create(category=category, node_text=node_text, node_code=node_code, version=version, node_standard=standard)
             node_data = import_data["node_data"][get_node_code(j)]
             for k in node_data.keys():
                 setattr(node, k, node_data[k])
