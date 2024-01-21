@@ -1132,13 +1132,13 @@ def add_backup(request, action):
     [version, state, currentversion] = current_version(request)
     data = take_snapshot(request)
 
-    if currentversion.history != None:
+    data_last = {}
+    backup = []
 
-        history = pickle.loads(currentversion.history)
-        backup, restore, data_last = history[0], history[1], history[2]
-    else:
-            data_last = {}
-            backup = []
+    if currentversion != None:
+        if currentversion.history != None:
+            history = pickle.loads(currentversion.history)
+            backup, restore, data_last = history[0], history[1], history[2]
 
     # delta = Delta(DeepDiff(data, data_last))
     # backup.append([action, delta])

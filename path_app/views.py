@@ -896,7 +896,9 @@ def add_version(request):
     if request.method == 'POST':    
         form = VersionForm(request.POST, user=request.user, other_users=False)
         if form.is_valid():
-            form.save()
+            version = form.save()
+            if CurrentVersion.objects.all().count() == 0:
+                CurrentVersion.objects.create(user=request.user, version=version)
 
             return HttpResponseRedirect("/versions/")
         else:
@@ -1054,14 +1056,17 @@ def set_version(request, id):
         return HttpResponseRedirect("/versions/")
 
     [v, state, currentversion] = current_version(request)
+    if currentversion != None:
+        if CurrentVersion.objects.get(user=request.user).version.id == id:
+            return HttpResponseRedirect("/versions/")
     version = Version.objects.get(id=id)
 
     if CurrentVersion.objects.filter(user=request.user).count() == 0:
         currentversion = CurrentVersion.objects.create(user=request.user, version=version)
         currentversion.save()
         add_backup(request, "generic")
-    elif CurrentVersion.objects.get(user=request.user).version.id == id:
-        CurrentVersion.objects.get(user=request.user, version=version).delete()
+    # elif CurrentVersion.objects.get(user=request.user).version.id == id:
+    #     CurrentVersion.objects.get(user=request.user, version=version).delete()
     else:
         setattr(currentversion, "version", version)
         currentversion.history = None
@@ -1312,8 +1317,10 @@ def upload_file(request):
                 #     currentversion.save()
                 # else:
                 # CurrentVersion.objects.create(user=request.user, version=version)
+                if CurrentVersion.objects.all().count() == 0:
+                    CurrentVersion.objects.create(user=request.user, version=version)
                 import_data(filedata, version)
-                add_backup(request, "generic")
+                # add_backup(request, "generic")
                 return HttpResponseRedirect("/versions/")
 
         context = {}
