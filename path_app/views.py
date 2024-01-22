@@ -1499,6 +1499,25 @@ def export_link_analysis(request):
 
     return response
 
+@login_required
+def export_standard_nodes(request):
+    # [version, state, currentversion] = current_version(request)
+
+    standard_nodes = NodeStandard.objects.all()
+
+    response = HttpResponse(
+        content_type="text/csv",
+        headers={"Content-Disposition": 'attachment; filename="standard_nodes.csv"'},
+    )    
+    writer = csv.writer(response)
+    writer.writerow(["Code", "Name", "Combined"])
+
+    for i in standard_nodes:
+
+        writer.writerow([i.code, i.name.replace("/", "-"), i.code + ": " + i.name.replace("/", "-")])
+
+    return response
+
 # Standardise nodes
 
 @login_required

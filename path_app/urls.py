@@ -121,4 +121,6 @@ urlpatterns = [
     path("standardise_nodes/", views.standardise_nodes, name="standardise_nodes"),
 
     path("export_link_analysis/", views.export_link_analysis, name="export_link_analysis"),
+
+    path("export_standard_nodes/", views.export_standard_nodes, name="export_standard_nodes"),
 ]
