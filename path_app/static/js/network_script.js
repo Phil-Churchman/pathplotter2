@@ -240,7 +240,7 @@ function moveNode(id, n, coord_x, coord_y, backup) {
 }
 
 function makeDraggable(evt, params) {
-  // evt.preventDefault();
+  evt.preventDefault();
   var svg = evt.target;
 
   var params = JSON.parse(params)
@@ -262,11 +262,11 @@ function makeDraggable(evt, params) {
 
   function mousedownEvent(evt) {
 
-    if (evt.touches) { 
-      if (evt.touches.length > 1) {return}
-      // evt = evt.touches[0]
-      if (!evt.target.classList.contains("node") && !evt.target.classList.contains("link_mid")) {return} }
-    evt.preventDefault()    
+    // if (evt.touches) { 
+    //   if (evt.touches.length > 1) {return}
+    //   evt = evt.touches[0]
+    //   if (!evt.target.classList.contains("node") && !evt.target.classList.contains("link_mid")) {return} }
+    // evt.preventDefault()    
     select_range = []
 
     if (evt.target.classList.contains("node") || evt.target.classList.contains("link_mid") || evt.target.id == "network") {
@@ -295,7 +295,7 @@ function makeDraggable(evt, params) {
   }
   function upEvent(evt) {
   
-    evt.preventDefault() 
+    // evt.preventDefault() 
     // if (evt.touches) { 
     //   evt = evt.touches[0]
     // }
@@ -531,7 +531,8 @@ function makeDraggable(evt, params) {
     //   evt = evt.touches[0]
     // }
 
-    evt.preventDefault();
+    // evt.preventDefault();
+
     if (selection_drag_active) {
 
       var coord = getMousePosition(evt);
@@ -670,7 +671,7 @@ function makeDraggable(evt, params) {
 
   function getMousePosition(evt) {
     var CTM = svg.getScreenCTM();
-    if (evt.touches) { evt = evt.touches[0]; }
+    // if (evt.touches) { evt = evt.touches[0]; }
     return {
       x: (evt.clientX - CTM.e) / CTM.a,
       y: (evt.clientY - CTM.f) / CTM.d
