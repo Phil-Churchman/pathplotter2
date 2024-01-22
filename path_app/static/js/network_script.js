@@ -680,19 +680,13 @@ function makeDraggable(evt, params) {
 }
 
 function getNetwork(network_data, colour_ref, conn_to_goal_legend, legend_loop, legend_group) {
-
   var [categories, nodes, links, params] = JSON.parse(network_data)
   var colour_ref = JSON.parse(colour_ref)
   var [conn_to_goal_legend] = JSON.parse(conn_to_goal_legend)
   var [legend_loop] = JSON.parse(legend_loop)
   var [legend_group] = JSON.parse(legend_group)
   var loop_options = true
-  // if (params["Model_choice"] == "AC") {
-  //   var loop_options = true
-  // }
-  // else {
-  //   var loop_options = false
-  // }
+
   if (Object.keys(edited_network_params).length != 0) {
     var params = edited_network_params
     var nodes = edited_nodes
@@ -711,9 +705,6 @@ function getNetwork(network_data, colour_ref, conn_to_goal_legend, legend_loop, 
     if (child_list[i].tagName == "defs") { continue }
     svg.removeChild(child_list[i])
   }
-
-  // svg.setAttribute("width", params["Plot_width"])
-  // svg.setAttribute("height", params["Plot_height"])
 
   if (params["Hide_links"] == false) {
 
@@ -834,7 +825,6 @@ function getNetwork(network_data, colour_ref, conn_to_goal_legend, legend_loop, 
       else {
         node.setAttribute("stroke", "grey")
       }
-      // node.setAttribute("stroke", "grey")
       
       node.setAttribute("fill", nodes[i]["colour"])
       node.setAttribute("class", "node draggable editable")
@@ -844,22 +834,14 @@ function getNetwork(network_data, colour_ref, conn_to_goal_legend, legend_loop, 
     }
   }
   additional = []
-  if (params["Model_choice"] == "AC") {
-    if (legend_loop) {additional.push(["arrow", "burlywood", "", "In loop"])}
-    if (legend_group) {additional.push(["arrow", "cornflowerblue", "", "In group"])}
-    // additional = [["arrow", "cornflowerblue", "", "In group"], ["arrow", "burlywood", "", "In loop"]]
-    // additional = [["arrow", "cornflowerblue", "", "In group"]]
-    }
-    else {
-    if (legend_loop) {additional.push(["arrow", "burlywood", "", "In loop"])}
-    // additional = [["arrow", "burlywood", "", "In loop"]]
-    // additional = []
-    }
-    if (conn_to_goal_legend) {
-      additional.push(["patch", "indianred", "white", "Not connected to goal"])
-    }
-    
-    legend(colour_ref, params, svg, additional)
+
+  if (legend_loop) {additional.push(["arrow", "burlywood", "", "In loop"])}
+  if (legend_group) {additional.push(["arrow", "cornflowerblue", "", "In group"])}
+  if (conn_to_goal_legend) {
+    additional.push(["patch", "indianred", "white", "Not connected to goal"])
+  }
+  
+  legend(colour_ref, params, svg, additional)
 }
 
 function clearSelection() {

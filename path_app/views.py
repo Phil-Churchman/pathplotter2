@@ -1130,13 +1130,6 @@ def update_loops(request):
                 
     return HttpResponseRedirect(state)
 
-# @login_required
-# def update_groups(request):
-#     [version, state, currentversion] = current_version(request)
-#     updategroups(request)
-#     add_backup(request, "generic")
-#     return HttpResponseRedirect(state)
-
 # Node, link and category functions
 
 @login_required
