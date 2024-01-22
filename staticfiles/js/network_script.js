@@ -249,11 +249,11 @@ function makeDraggable(evt, params) {
   svg.addEventListener('mousedown', mousedownEvent);
   svg.addEventListener('mousemove', drag);
   svg.addEventListener('mouseup', upEvent);
-  svg.addEventListener('touchstart', mousedownEvent);
-  svg.addEventListener('touchmove', drag);
-  svg.addEventListener('touchend', upEvent);  
-  svg.addEventListener('touchcancel', upEvent);
-  svg.addEventListener('touchleave', upEvent)
+  // svg.addEventListener('touchstart', mousedownEvent);
+  // svg.addEventListener('touchmove', drag);
+  // svg.addEventListener('touchend', upEvent);  
+  // svg.addEventListener('touchcancel', upEvent);
+  // svg.addEventListener('touchleave', upEvent)
   // svg.addEventListener('mouseleave', endDrag);
 
   var selectedElement, offset;
