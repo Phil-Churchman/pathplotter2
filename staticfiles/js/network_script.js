@@ -249,10 +249,11 @@ function makeDraggable(evt, params) {
   svg.addEventListener('mousedown', mousedownEvent);
   svg.addEventListener('mousemove', drag);
   svg.addEventListener('mouseup', upEvent);
-  // svg.addEventListener('touchstart', mousedownEvent);
-  // svg.addEventListener('touchmove', drag);
-  // svg.addEventListener('touchend', upEvent);  
-  // svg.addEventListener('touchcancel', upEvent);
+  svg.addEventListener('touchstart', mousedownEvent);
+  svg.addEventListener('touchmove', drag);
+  svg.addEventListener('touchend', upEvent);  
+  svg.addEventListener('touchcancel', upEvent);
+  svg.addEventListener('touchleave', upEvent)
   // svg.addEventListener('mouseleave', endDrag);
 
   var selectedElement, offset;
@@ -653,6 +654,7 @@ function makeDraggable(evt, params) {
 
   function getMousePosition(evt) {
     var CTM = svg.getScreenCTM();
+    if (evt.touches) { evt = evt.touches[0]; }
     return {
       x: (evt.clientX - CTM.e) / CTM.a,
       y: (evt.clientY - CTM.f) / CTM.d
