@@ -258,16 +258,13 @@ function makeDraggable(evt, params) {
 
   var selectedElement, offset;
   var starting = {}
-  var touchdrag = false
 
 
   function mousedownEvent(evt) {
     // evt.preventDefault()
-    touchdrag = false
     if (evt.touches) { 
       if (evt.touches.length > 1) {return}
-      evt = evt.touches[0] 
-      touchdrag = true
+      evt = evt.touches[0]
       if (!evt.target.classList.contains("node") && !evt.target.classList.contains("link_mid")) {return} }
     
     select_range = []
@@ -298,10 +295,9 @@ function makeDraggable(evt, params) {
   }
   function upEvent(evt) {
 
-    if (touchdrag) {
-      evt = evt.touches[0] 
+    if (evt.touches) { 
+      evt = evt.touches[0]
     }
-
     if (evt.ctrlKey) {
     }
     else if (evt.altKey) {
@@ -530,8 +526,8 @@ function makeDraggable(evt, params) {
 
   function drag(evt) {
 
-    if (touchdrag) {
-      evt = evt.touches[0] 
+    if (evt.touches) { 
+      evt = evt.touches[0]
     }
     
     evt.preventDefault();
@@ -673,7 +669,7 @@ function makeDraggable(evt, params) {
 
   function getMousePosition(evt) {
     var CTM = svg.getScreenCTM();
-    // if (evt.touches) { evt = evt.touches[0]; }
+    if (evt.touches) { evt = evt.touches[0]; }
     return {
       x: (evt.clientX - CTM.e) / CTM.a,
       y: (evt.clientY - CTM.f) / CTM.d
