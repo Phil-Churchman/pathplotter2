@@ -126,10 +126,8 @@ if os.environ.get('DEV') == "false":
 
     root = 'https://'+ os.environ['WEBSITE_HOSTNAME']
 
-    CSRF_TRUSTED_ORIGINS = [root, os.path.join(root, "set-version")]
+    CSRF_TRUSTED_ORIGINS = [root, os.path.join(root, "set-version"), "https://www.pathplotter.net", "https://pathplotter.net", "https://www.pathplotter.net/set-version", "https://pathplotter.net/set-version"]
     # CSRF_TRUSTED_ORIGINS = ["*"]
-
-    # STATIC_ROOT = BASE_DIR / "staticfiles"
 
 else:
 
