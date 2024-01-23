@@ -123,4 +123,8 @@ urlpatterns = [
     path("export_link_analysis/", views.export_link_analysis, name="export_link_analysis"),
 
     path("export_standard_nodes/", views.export_standard_nodes, name="export_standard_nodes"),
+
+    path("export_snapshot/", views.export_snapshot, name="export_snapshot"),
+
+    path("import_snapshot/", views.import_snapshot, name="import_snapshot"),
 ]

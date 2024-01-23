@@ -76,12 +76,16 @@ def categories(request):
 
 @login_required
 def versions(request, **kwargs):
-# def versions(request):    
+    if CurrentVersion.objects.filter(user=request.user).count() == 0:
+        CurrentVersion.objects.create(user=request.user)
+
     if kwargs["start"] == "start":
         check_db()
     template = loader.get_template('versions.html')
     user = request.user
     versions = Version.objects.filter(user=user, archive=False).order_by("name")
+    # if CurrentVersion.objects.filter(user=request.user).count() == 0:
+    #     CurrentVersion.objects.create(user=request.user, version = list(versions)[0])    
     # versions = list(Version.objects.filter(user=user, archive=False).order_by("name"))
     # versions = sorted(versions,key = lambda x: x.name)
     [version, state, currentversion] = current_version(request)
@@ -1059,8 +1063,9 @@ def set_version(request, id):
 
     [v, state, currentversion] = current_version(request)
     if currentversion != None:
-        if CurrentVersion.objects.get(user=request.user).version.id == id:
-            return HttpResponseRedirect("/versions/")
+        if currentversion.version != None:
+            if CurrentVersion.objects.get(user=request.user).version.id == id:
+                return HttpResponseRedirect("/versions/")
     version = Version.objects.get(id=id)
 
     if CurrentVersion.objects.filter(user=request.user).count() == 0:
@@ -1457,7 +1462,10 @@ def export_enabled_nodes(request):
     writer = csv.writer(response)
     writer.writerow(["Version", "Category code", "Node code", "Description", "Standard"])
     for i in enabled_nodes:
-        writer.writerow([version.name, str(i.category.category_code), str(i.node_code), i.node_text, i.node_standard.code + ": " + i.node_standard.name])
+        if i.node_standard != None:
+            writer.writerow([version.name, str(i.category.category_code), str(i.node_code), i.node_text, i.node_standard.code + ": " + i.node_standard.name])
+        else:
+            writer.writerow([version.name, str(i.category.category_code), str(i.node_code), i.node_text, ""])
 
     return response
 
@@ -1511,26 +1519,61 @@ def export_standard_nodes(request):
 
     return response
 
+@login_required
+def export_snapshot(request):
+    # [version, state, currentversion] = current_version(request)
+
+    data = take_snapshot(request)
+
+    response = HttpResponse(
+        content_type="application/pkl",
+        headers={"Content-Disposition": 'attachment; filename="snapshot.pkl"'},
+    )    
+    pickle.dump(data, response, protocol=pickle.HIGHEST_PROTOCOL)
+
+    return response
+
+@login_required
+def import_snapshot(request):
+    [v, state, currentversion] = current_version(request)
+
+    if request.method == 'POST':
+        form = VersionForm(request.POST, request.FILES, user=request.user, other_users=False)
+
+        if form.is_valid():
+            
+            if request.FILES:
+                myfile = request.FILES.get('myfile')
+                filedata = pickle.load(myfile)
+                version = form.save()
+                if currentversion != None:
+                    currentversion.version = version
+                    currentversion.history = None
+                    currentversion.gantt_buffer = None
+                    currentversion.save()
+                else:
+                    CurrentVersion.objects.create(user=request.user, version=version)
+                # if CurrentVersion.objects.all().count() == 0:
+                #     CurrentVersion.objects.create(user=request.user, version=version)
+                reverse_snapshot(request, filedata)
+                add_backup(request, "generic")
+                return HttpResponseRedirect("/versions/")
+
+        context = {}
+        context['form'] = form
+        return render(request, 'import_snapshot.html', context)
+    else:
+        context = {}
+        form = VersionForm(user=request.user, other_users=False, initial={"user": request.user})
+        context['form'] = form
+    return render(request, 'import_snapshot.html', context)
+
+
 # Standardise nodes
 
 @login_required
 def standardise_nodes(request):
     [version, state, currentversion] = current_version(request)
-
-    # try: 
-    #     nodes = list(Node.objects.filter(version=version, enabled=True))
-    #     categories = list(Category.objects.filter(version=version, enabled=True))
-    #     for i in list(nodes):
-    #         if i.category not in categories:
-    #             i.delete()
-    #     node_standards = list(set([i.node_standard.code for i in nodes]))
-    #     category_codes = list(set([i.category_code for i in categories]))
-    #     for i in node_standards:
-    #         if i not in category_codes:
-    #             return HttpResponseRedirect("/versions_fail/")
-    # except:
-    #     return HttpResponseRedirect("/versions_fail/")
-
 
     for i in list(Category.objects.filter(version=version, enabled=False)):
         i.delete()
@@ -1548,26 +1591,24 @@ def standardise_nodes(request):
 
     counter0 = alphabet.index(node_code_list[-1][0]) + 1
     counter1 = 0
-    
-    nodes_standard = {}
 
-    category_codes = list(set([i.category_code for i in list(Category.objects.filter(version=version))]))
+    node_standard_dict = {}
 
     for i in nodes:
-        if i.node_standard.code in category_codes:
-            existing_nodes = list(Node.objects.filter(version=version, category=Category.objects.get(version=version, category_code=i.node_standard.code), node_text = i.node_standard.name, node_standard=NodeStandard.objects.get(name="Not defined")))
-            if len(existing_nodes) != 0:
-                for j in list(existing_nodes):
-                    if j.node_code <= node_code_list[-1]:
-                        existing_nodes.remove(j)
-                if len(existing_nodes) != 0:
-                    nodes_standard[i] = existing_nodes[0]
-                    continue
-    
-            if i.node_standard.code != ">":
-                nodes_standard[i] = Node.objects.create(version=version, node_code = alphabet[counter0] + alphabet[counter1], category=Category.objects.get(version=version, category_code=i.node_standard.code), node_text = i.node_standard.name)
-            else:
-                nodes_standard[i] = Node.objects.create(version=version, node_code = alphabet[counter0] + alphabet[counter1], category=Category.objects.get(version=version, category_code=i.node_standard.code), node_text = i.node_text)
+        existing_standard = Node.objects.filter(version=version, category=Category.objects.get(version=version, category_code=i.node_standard.code), node_text=i.node_standard.name).exclude(node_code=i.node_code)
+        if existing_standard.count() == 1:
+            new_node = list(existing_standard)[0]
+            if i.duration > new_node.duration:
+                new_node.duration = i.duration
+            if i.weight > new_node.weight:
+                new_node.weight = i.weight
+            if i.notes != None:
+                if new_node.notes != None:
+                    new_node.notes = new_node.notes + " -- " + i.notes
+                else: new_node.notes = i.notes
+            new_node.save()
+        elif existing_standard.count() == 0:
+            new_node = Node.objects.create(version=version, duration=i.duration, weight=i.weight, notes=i.notes, node_standard = i.node_standard, category=Category.objects.get(version=version, category_code=i.node_standard.code), node_code=alphabet[counter0]+ alphabet[counter1], node_text=i.node_standard.name)
             if counter1 < len(alphabet) - 1:
                 counter1 +=1
             elif counter1 == len(alphabet) - 1  and counter0 == len(alphabet) - 1:
@@ -1575,21 +1616,23 @@ def standardise_nodes(request):
             else:
                 counter1 = 0
                 counter0 +=1            
-
         else:
-            print(i)
+            existing_standard = list(existing_standard)
+            existing_standard = sorted(existing_standard, key = lambda x: -x.node_code)
+            new_node = existing_standard[0]
+        node_standard_dict[i] = new_node
 
     for i in links:
-        if nodes_standard[i.from_node] != nodes_standard[i.to_node]:
-            if Link.objects.filter(version=version, from_node = nodes_standard[i.from_node], to_node = nodes_standard[i.to_node]).count() == 0:
-                Link.objects.create(version=version, from_node = nodes_standard[i.from_node], to_node = nodes_standard[i.to_node])
-    
+        if node_standard_dict[i.from_node] == node_standard_dict[i.to_node]: continue
+        if Link.objects.filter(version=version, from_node=node_standard_dict[i.from_node], to_node=node_standard_dict[i.to_node]).count() == 0:
+            Link.objects.create(version=version, from_node=node_standard_dict[i.from_node], to_node=node_standard_dict[i.to_node])
+
     for i in list(nodes):
         i.delete()
     
     nodes = list(Node.objects.filter(version=version))
     node_code_list = [i.node_code for i in nodes]
-    node_code_list.sort()    
+    node_code_list.sort()
     counter0_delta = alphabet.index(node_code_list[0][0])
     counter1_delta = alphabet.index(node_code_list[0][1])
 

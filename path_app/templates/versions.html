@@ -22,8 +22,15 @@
             <a class="nav-link" aria-current="page" href="/versions_archive/">Archived versions</a>
             <!-- <a class="nav-link" aria-current="page" data-bs-toggle="offcanvas" href="#versionSidebar" role="button" aria-controls="offcanvasExample">Add version</a> -->
           </li>  
-          <li class="nav-item">
-            <a class="nav-link" href="/upload-file/">Upload file</a>
+
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Import
+            </a>
+            <ul class="dropdown-menu">
+              <!-- <li><a class="dropdown-item" href="/import_snapshot/">Import version file (PKL)</a></li> -->
+              <li><a class="dropdown-item" href="/upload-file/">Import legacy file (JSON)</a></li>
+            </ul>
           </li>
           {% if version_not_selected %}
 
