@@ -1568,7 +1568,6 @@ def import_snapshot(request):
         context['form'] = form
     return render(request, 'import_snapshot.html', context)
 
-
 # Standardise nodes
 
 @login_required
