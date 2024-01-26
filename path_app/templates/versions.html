@@ -71,10 +71,7 @@
   {% else %}
   <tr id="version{{x.id}}" class="">  
   {% endif %}
-  <td><form action="/edit-version/{{x.id}}" onsubmit="showPleaseWait()">
-    <!-- <button type="submit" class="btn btn-secondary btn-sm">Edit</button> -->
-    <input type="image" name="submit" src="/static/icons/pencil.svg" alt="Submit" style="width:20px;height:auto;"/>
-  </form></td>
+
   <td><form action="/archive-version/{{x.id}}" onsubmit="showPleaseWait()">
     <!-- <button type="submit" class="btn btn-secondary btn-sm">Archive</button> -->
     <input type="image" name="submit" src="/static/icons/archive.svg" alt="Submit" style="width:20px;height:auto;" />
@@ -83,6 +80,10 @@
     <!-- <button type="submit" class="btn btn-secondary btn-sm">Delete</button> -->
     <input type="image" name="submit" src="/static/icons/copy.svg" alt="Submit" style="width:20px;height:auto;"  />
     <!-- <img src = "/static/icons/trash3.svg" style="width:20px;height:auto;" type="submit"> -->
+  </form></td>
+  <td><form action="/edit-version/{{x.id}}" onsubmit="showPleaseWait()">
+    <!-- <button type="submit" class="btn btn-secondary btn-sm">Edit</button> -->
+    <input type="image" name="submit" src="/static/icons/pencil.svg" alt="Submit" style="width:20px;height:auto;"/>
   </form></td>
 <td>
   <!-- <a href="/set-version/{{x.id}}" onclick="showPleaseWait()" class="link-offset-2 link-underline link-underline-opacity-0">{{x.name}}</a> -->

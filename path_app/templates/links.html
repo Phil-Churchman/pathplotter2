@@ -37,10 +37,11 @@
 
   <th scope="col"></th>
   <th scope="col"></th>
-  <th scope="col"></th>
   {% if superuser %}
   <th></th>
   {% endif %}
+  <th scope="col"></th>
+
   <th scope="col" colspan=2 style="width: 400px">From node</th>
 
   <th scope="col" colspan=2 style="width: 400px">To node</th>
@@ -53,13 +54,15 @@
 </form>
 
   <tr>
+    <td></td>
     <td class="text-center">
-      <a>Enabled</a></td>
-<td></td>
-<td></td>
+</td>
+
+
 {% if superuser %}
 <td></td>
 {% endif %}
+<td></td>
 <td colspan=2>
   <select class="form-select" aria-label="From category filter" name="from_category" id="from_category" form="category_selection" onchange="this.form.submit()" >
 
@@ -95,7 +98,12 @@
 
 {% for x in links %}
 <tr id="row{{x.id}}">
-
+  <td>
+    <form id="del{{x.id}}" onsubmit="return false;">
+  
+      <input type="image" src="/static/icons/trash3.svg" value='{"id": {{x.id}}, "ob_type": "link", "backup": true}' onclick="delAJAX(this.value)" style="width:20px;height:auto;"/>
+    </form>
+    </td>
   <td>
     <div class="container" style="align-items: center;">
     <!-- <form action="/switch/link/{{x.id}}"> -->
@@ -117,31 +125,22 @@
   
   </td>
   
-  
+  {% if superuser %}
+  <td>
+  <form id="standard{{x.id}}" onsubmit="return false;">
+    <input type="image" src="/static/icons/share.svg" value='{"id": {{x.id}}}' onclick="standardAJAX(this.value)" style="width:20px;height:auto;"/>
+  </form>
+</td>
+  {% endif %}  
   <td><form action="/edit-link/{{x.id}}" onsubmit="showPleaseWait()">
-    <!-- {% csrf_token %} -->
-    <!-- <input type="hidden" id="node_id" type="text" name="node_id" value={{x.id}}> -->
-    <!-- <button type="submit" class="btn btn-secondary btn-sm">Edit</button> -->
+
     <input type="image" name="submit" src="/static/icons/pencil.svg" alt="Submit" style="width:20px;height:auto;"/>
   </form></td>
   
-  <td>
-  <form id="del{{x.id}}" onsubmit="return false;">
-    <!-- {% csrf_token %} -->
-    <!-- <input type="hidden" id="del_node" type="text" name="del_node" value={{x.id}}> -->
-    <!-- <button type="submit" class="btn btn-secondary btn-sm">Delete</button> -->
-    <input type="image" src="/static/icons/trash3.svg" value='{"id": {{x.id}}, "ob_type": "link", "backup": true}' onclick="delAJAX(this.value)" style="width:20px;height:auto;"/>
-  </form>
-  </td>
+
   
  
-    {% if superuser %}
-    <td>
-    <form id="standard{{x.id}}" onsubmit="return false;">
-      <input type="image" src="/static/icons/share.svg" value='{"id": {{x.id}}}' onclick="standardAJAX(this.value)" style="width:20px;height:auto;"/>
-    </form>
-  </td>
-    {% endif %}
+
 
 <td style="width: 50px">
   <a>{{x.from_node.category.category_code}}:{{x.from_node.node_code}}</a>

@@ -38,9 +38,9 @@
 
 <tbody>
   <tr>
-
+      <td></td>
       <td class="text-center">
-        <a>Enabled</a></td>
+        </td>
       <td></td>
       <td></td>
     <td colspan=2>
@@ -63,6 +63,14 @@
 
 
 <tr id="row{{x.id}}">
+  <td class="text-center">
+    <form id="del{{x.id}}" onsubmit="return false;">
+    <!-- {% csrf_token %} -->
+    <!-- <input type="hidden" id="del_node" type="text" name="del_node" value={{x.id}}> -->
+    <!-- <button type="submit" class="btn btn-secondary btn-sm">Delete</button> -->
+    <input type="image" src="/static/icons/trash3.svg" value='{"id": {{x.id}}, "ob_type": "node", "backup": true}' onclick="delAJAX(this.value)" style="width:20px;height:auto;"/>
+  </form>
+  </td>
   <td>
     <div class="container" style="align-items: center;">
   <form method="post" id="switch{{x.id}}">
@@ -88,17 +96,7 @@
   <button class="btn btn-secondary btn-sm" onclick="editNode('{{x}}')">Edit</button>
 </td> -->
 
-<td class="text-center">
-  <form id="del{{x.id}}" onsubmit="return false;">
-  <!-- {% csrf_token %} -->
-  <!-- <input type="hidden" id="del_node" type="text" name="del_node" value={{x.id}}> -->
-  <!-- <button type="submit" class="btn btn-secondary btn-sm">Delete</button> -->
-  <input type="image" src="/static/icons/trash3.svg" value='{"id": {{x.id}}, "ob_type": "node", "backup": true}' onclick="delAJAX(this.value)" style="width:20px;height:auto;"/>
-</form>
 
-
-
-</td>
 
 
   <td style="width: 50px">

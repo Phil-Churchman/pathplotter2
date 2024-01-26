@@ -33,12 +33,19 @@
 
 
   <tr>
+    <td></td>
     <td>Enabled</td>
 
   </tr>
 {% for x in categories %}
 <tr id="row{{x.id}}">
 {% if x.editable %}
+<td>
+  <form id="del{{x.id}}" onsubmit="return false;">
+
+    <input type="image" src="/static/icons/trash3.svg" value='{"id": {{x.id}}, "ob_type": "category", "backup": true}' onclick="delAJAX(this.value)" style="width:20px;height:auto;"/>
+  </form>
+  </td>
 <td>
   <div class="container">
   <form method="post" id="switch">
@@ -54,20 +61,12 @@
 </form>
 </div>
 </td>
-<td class="text-center"><form action="/edit-category/{{x.id}}" onsubmit="showPleaseWait()">
-  <!-- {% csrf_token %} -->
-  <!-- <input type="hidden" id="node_id" type="text" name="node_id" value={{x.id}}> -->
+
+  <td class="text-center"><form action="/edit-category/{{x.id}}" onsubmit="showPleaseWait()">
 
   <input type="image" name="submit" src="/static/icons/pencil.svg" alt="Submit" style="width:20px;height:auto;"  />
 </form></td>
-<td>
-  <form id="del{{x.id}}" onsubmit="return false;">
-    <!-- {% csrf_token %} -->
-    <!-- <input type="hidden" id="del_node" type="text" name="del_node" value={{x.id}}> -->
-    <!-- <button type="submit" class="btn btn-secondary btn-sm">Delete</button> -->
-    <input type="image" src="/static/icons/trash3.svg" value='{"id": {{x.id}}, "ob_type": "category", "backup": true}' onclick="delAJAX(this.value)" style="width:20px;height:auto;"/>
-  </form>
-  </td>
+
 {% else %}
 <td></td>
 <td></td>
