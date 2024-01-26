@@ -28,8 +28,8 @@
 <div class="container">
   <p></p>
   <a>Category:</a>
-  <ul style="list-style: none; text-align: left;">
-    <li><a href="/edit-category/{{ node.category.id}}" class="link-offset-2 link-underline link-underline-opacity-0">{{ node.category.category_code }}: {{ node.category.category_text }}</a></li>
+  <ul class="list-group list-group-flush">
+    <li class="list-group-item"><a href="/edit-category/{{ node.category.id}}" class="link-offset-2 link-underline link-underline-opacity-0">{{ node.category.category_code }}: {{ node.category.category_text }}</a></li>
     </ul>
     <p></p>
 <form action="/edit-node/{{node_id}}" method="post" onsubmit="showPleaseWait()">

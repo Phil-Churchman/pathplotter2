@@ -36,7 +36,10 @@ urlpatterns = [
 
     path("edit-category/<int:id>", views.edit_category, name="edit_category"),
     path("edit-version/<int:id>", views.edit_version, name="edit_version"),
+
     path("set-version/<int:id>/", views.set_version, name="set_version"),
+
+    path("set_version_ajax/", views.set_version_ajax, name="set_version_ajax"),
 
     path("add-version/", views.add_version, name="add_version"),
     path("copy-version/<int:id>", views.copy_version, name="copy_version"),
@@ -118,13 +121,21 @@ urlpatterns = [
 
     path("export_enabled_nodes/", views.export_enabled_nodes, name="export_enabled_nodes"),
 
+    path("export_links/", views.export_links, name="export_links"),
+
     path("standardise_nodes/", views.standardise_nodes, name="standardise_nodes"),
 
     path("export_link_analysis/", views.export_link_analysis, name="export_link_analysis"),
 
     path("export_standard_nodes/", views.export_standard_nodes, name="export_standard_nodes"),
 
+    path("export_standard_links/", views.export_standard_links, name="export_standard_links"),
+
     path("export_snapshot/", views.export_snapshot, name="export_snapshot"),
 
     path("import_snapshot/", views.import_snapshot, name="import_snapshot"),
+
+    path("add_link_standard/", views.add_link_standard, name="add_link_standard"),
+
+    path("apply_link_standards/", views.apply_link_standards, name="apply_link_standards"),
 ]

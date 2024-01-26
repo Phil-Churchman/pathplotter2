@@ -45,7 +45,7 @@ class VersionForm(forms.ModelForm):
         exclude = ['current', 'state', 'number', "archive"
                 #    , "user"
                    ]
-        # widgets = {'user': forms.HiddenInput()}  
+        widgets = {'user': forms.HiddenInput()}  
             
     def __init__(self, *args, user, other_users, **kwargs):
         super(VersionForm, self).__init__(*args, **kwargs)
@@ -61,19 +61,45 @@ class VersionForm(forms.ModelForm):
         else:
             self.fields['user'].queryset = User.objects.filter(username=user.username)
 
+class VersionCopyForm(forms.ModelForm):
+
+    class Meta: 
+        model = Version 
+        fields = '__all__'
+        exclude = ['current', 'state', 'number', "archive"
+                #    , "user"
+                   ]
+        # widgets = {'user': forms.HiddenInput()}  
+            
+    def __init__(self, *args, user, other_users, **kwargs):
+        super(VersionCopyForm, self).__init__(*args, **kwargs)
+        groups = list(Group.objects.filter(user=user))
+        username_list = [user]
+        for group in groups:
+            group_users = list(group.user_set.all())
+            for u in group_users:
+                if u.username not in username_list:
+                    username_list.append(u.username)
+        if other_users:
+            self.fields['user'].queryset = User.objects.filter(username__in=username_list)
+        else:
+            self.fields['user'].queryset = User.objects.filter(username=user.username)
+
+
 class LoopForm(forms.ModelForm):
 
     class Meta: 
         model = Loop 
         fields = '__all__'
         exclude = [
-            'version', 
+            # 'version', 
             'links', 'copied_to'
             # , 'enabled'
             ]
         widgets = {'version': forms.HiddenInput()}  
 
     def __init__(self, *args, version, **kwargs):
+        self.version = version
         super(LoopForm, self).__init__(*args, **kwargs)
         # self.fields['version'].queryset = Version.objects.filter(id=version.id)
         for field in self.fields.keys():
@@ -83,15 +109,43 @@ class LoopForm(forms.ModelForm):
             })     
 
 class NodeForm(forms.ModelForm):
-    
+
+    def clean_node_code(self):
+        # version=self.cleaned_data["version"]
+        node_code=self.cleaned_data["node_code"]            
+        category=self.cleaned_data["category"]
+        node_code_check = Node.objects.filter(version = self.version, node_code=node_code, category=category)
+        if node_code_check.count() != 0:
+            if self.instance.id != None:
+                if self.instance.id != node_code_check[0].id:
+                    raise ValidationError('Node with with category and node code already exists.')
+            else:
+                raise ValidationError('Node with with category and node code already exists.')            
+
+        return node_code
+
+    def clean_node_text(self):
+        # version=self.cleaned_data["version"]
+        node_text=self.cleaned_data["node_text"]            
+        category=self.cleaned_data["category"]
+        node_text_check = Node.objects.filter(version = self.version, node_text=node_text, category=category)
+        if node_text_check.count() != 0:
+            if self.instance.id != None:
+                if self.instance.id != node_text_check[0].id:
+                    raise ValidationError('Node with with category and node text already exists.')
+            else:
+                raise ValidationError('Node with with category and node text already exists.')            
+
+        return node_text
+
     class Meta: 
         model = Node
         fields = '__all__'
         exclude = [
             # 'version',
             # 'xpos', 'ypos', 'placed', 
-            'copied_to', 'selected', 'connected_to_goal', "connected_to_goal_enabled", "weight"]   
-        widgets = {'xpos': forms.HiddenInput(), 'ypos': forms.HiddenInput(), 'placed': forms.HiddenInput()}    
+            'copied_to', 'selected', 'connected_to_goal', "connected_to_goal_enabled", "weight", "temp"]   
+        widgets = {'xpos': forms.HiddenInput(), 'ypos': forms.HiddenInput(), 'placed': forms.HiddenInput(), 'version': forms.HiddenInput()}    
         # error_messages = {
         #     NON_FIELD_ERRORS: {
         #         'unique_together': "Category and node code are not unique.",
@@ -100,14 +154,17 @@ class NodeForm(forms.ModelForm):
 
 
     def __init__(self, *args, version, **kwargs):
+    # def __init__(self, *args, **kwargs):
+        self.version = version
         super(NodeForm, self).__init__(*args, **kwargs)
-        self.fields['version'].queryset = Version.objects.filter(id=version.id)
+        # self.fields['version'].queryset = Version.objects.filter(id=version.id)
+
         self.fields['category'].queryset = Category.objects.filter(version=version)
         self.fields['duration'].validators.append(val_duration)
         self.fields['duration'].error_messages={"Duration needs to be greater than or equal to zero"}
 
 class CategoryForm(forms.ModelForm):
-    class Meta: 
+    class Meta:
         model = Category 
         fields = '__all__'
         exclude = [
@@ -118,11 +175,13 @@ class CategoryForm(forms.ModelForm):
                 'unique_together': "Category code is not unique.",
             }
         }    
+        widgets = {'version': forms.HiddenInput()}
 
 
     def __init__(self, *args, version, **kwargs):
+        self.version = version
         super(CategoryForm, self).__init__(*args, **kwargs)
-        self.fields['version'].queryset = Version.objects.filter(id=version.id)
+        # self.fields['version'].queryset = Version.objects.filter(id=version.id)
                 
 class LinkForm(forms.ModelForm):
     class Meta: 
@@ -131,12 +190,13 @@ class LinkForm(forms.ModelForm):
         exclude = ['xmid', 'ymid', 'in_enabled_loop', 'in_enabled_group', 'in_loop', 'in_group', "weight",
                     # 'version',
                       'copied_to']
-        # widgets = {'version': forms.HiddenInput()}
+        widgets = {'version': forms.HiddenInput()}
 
 
     def __init__(self, *args, version, **kwargs):
+        self.version = version
         super(LinkForm, self).__init__(*args, **kwargs)
-        self.fields['version'].queryset = Version.objects.filter(id=version.id)
+        # self.fields['version'].queryset = Version.objects.filter(id=version.id)
         self.fields['from_node'].queryset = Node.objects.filter(version=version)
         self.fields['to_node'].queryset = Node.objects.filter(version=version)
         # self.fields['weight'].validators.append(val_weight)

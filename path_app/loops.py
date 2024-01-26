@@ -5,7 +5,7 @@ import copy
 
 def get_loops(edge_list, version, check_only):
 
-    max_loops = 50
+    max_loops = 100
 
     edge_list = [tuple(i) for i in edge_list]
     chains_temp = {}

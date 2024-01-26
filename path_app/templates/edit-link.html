@@ -34,9 +34,9 @@
 <p></p>
 
 <a>Nodes:</a>
-<ul style="list-style: none; text-align: left;">
-<li><a href="/edit-node/{{ from_node.id}}" class="link-offset-2 link-underline link-underline-opacity-0">{{ from_node.category.category_code }}{{ from_node.node_code }}: {{ from_node.node_text }}</a></li>
-<li><a href="/edit-node/{{ to_node.id}}" class="link-offset-2 link-underline link-underline-opacity-0">{{ to_node.category.category_code }}{{ to_node.node_code }}: {{ to_node.node_text }}</a></li>
+<ul class="list-group list-group-flush">
+<li class="list-group-item"><a href="/edit-node/{{ from_node.id}}" class="link-offset-2 link-underline link-underline-opacity-0">{{ from_node.category.category_code }}{{ from_node.node_code }}: {{ from_node.node_text }}</a></li>
+<li class="list-group-item"><a href="/edit-node/{{ to_node.id}}" class="link-offset-2 link-underline link-underline-opacity-0">{{ to_node.category.category_code }}{{ to_node.node_code }}: {{ to_node.node_text }}</a></li>
 </ul>
 <p></p>
 <form action="/edit-link/{{link_id}}" method="post" onsubmit="showPleaseWait()">

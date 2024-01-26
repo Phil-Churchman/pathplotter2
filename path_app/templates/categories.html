@@ -31,19 +31,16 @@
 
 <table class="table table-responsive table-borderless align-middle w-auto mt-3">
 
-  <th scope="col" colspan=2 style="width: 300px">Category</th>
-  <th scope="col">Enabled</th>
   <th scope="col"></th>
   <th scope="col"></th>
+  <th scope="col"></th>
+  <th scope="col"></th>
+  <tr>
+    <td>Enabled</td>
+
+  </tr>
 {% for x in categories %}
 <tr id="row{{x.id}}">
-<td style="width: 20px">
-  <a>{{x.category_code}}</a>
-</td>
-<td>
-  <a>{{x.category_text}}</a>
-</td>
-
 {% if x.editable %}
 <td>
   <div class="container">
@@ -74,7 +71,20 @@
     <input type="image" src="/static/icons/trash3.svg" value='{"id": {{x.id}}, "ob_type": "category", "backup": true}' onclick="delAJAX(this.value)" style="width:20px;height:auto;"/>
   </form>
   </td>
+{% else %}
+<td></td>
+<td></td>
+<td></td>
 {% endif %}
+
+<td style="width: 20px">
+  <a>{{x.category_code}}</a>
+</td>
+<td>
+  <a>{{x.category_text}}</a>
+</td>
+
+
 </tr>
 {% endfor %}
 </table>

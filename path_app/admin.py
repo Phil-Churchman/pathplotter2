@@ -12,6 +12,14 @@ class NodeStandardResource(resources.ModelResource):
 class NodeStandardAdmin(ImportExportModelAdmin):
     resource_classes = [NodeStandardResource]
 
+class LinkStandardResource(resources.ModelResource):
+
+    class Meta:
+        model = LinkStandard
+
+class LinkStandardAdmin(ImportExportModelAdmin):
+    resource_classes = [LinkStandardResource]    
+
 # Register your models here.
 
 admin.site.register(Category)
@@ -33,4 +41,5 @@ admin.site.register(Version)
 admin.site.register(CurrentVersion)
 admin.site.register(Grouped)
 admin.site.register(NodeStandard, NodeStandardAdmin)
+admin.site.register(LinkStandard, LinkStandardAdmin)
 

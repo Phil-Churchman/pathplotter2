@@ -53,14 +53,13 @@ function saveSwitch(id) {
 }
 
 function sendAJAXRequest(post_data, dest) {
-
   // e.preventDefault();
   $.post(dest,
     {
       post_data: post_data,
       csrfmiddlewaretoken: getCookie('csrftoken'),
     },
-
+// 
     );
 }
 
@@ -125,8 +124,28 @@ function delAJAX(data) {
   });
   sendAJAXRequest(data, "/del-ajax/")
   row.remove()
+}
+
+function standardAJAX(data) {
+  sendAJAXRequest(data, "/add_link_standard/")
+}
+
+function setversionAJAX(data) {
+  sendAJAXRequest(JSON.stringify(data), "/set_version_ajax/")
+  var selected = document.getElementById("version" + String(data["id"]))
+  selected.addEventListener("click", function(event){
+    event.preventDefault()
+  });  
+  var prev_selected = document.getElementsByClassName("table-active")
+  if (prev_selected.length > 0) {
+    for(let i = 0; i < prev_selected.length; i++) {
+      prev_selected[i].className = ""
+  }
+    selected.className = "table-active"
 
 }
+}
+
 
 function saveEnabledOnly(checked) {
 

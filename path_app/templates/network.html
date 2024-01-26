@@ -50,8 +50,8 @@
             <li><a class="dropdown-item" href="../edit-param/network/Hide_links/True/">Hide</a></li>
           </ul> -->
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" onclick="changeParam('network', 'Hide_links', false); getNetwork('{{network_data}}', '{{ colour_ref }}', '{{ conn_to_goal_legend }}')">Show</a></li>
-            <li><a class="dropdown-item" onclick="changeParam('network', 'Hide_links', true); getNetwork('{{network_data}}', '{{ colour_ref }}', '{{ conn_to_goal_legend }}')">Hide</a></li>
+            <li><a class="dropdown-item" onclick="changeParam('network', 'Hide_links', false); getNetwork('{{network_data}}', '{{ colour_ref }}', '{{ conn_to_goal_legend }}', '{{ legend_loop }}', '{{ legend_group }}')">Show</a></li>
+            <li><a class="dropdown-item" onclick="changeParam('network', 'Hide_links', true); getNetwork('{{network_data}}', '{{ colour_ref }}', '{{ conn_to_goal_legend }}', '{{ legend_loop }}', '{{ legend_group }}')">Hide</a></li>
           </ul>  
         </li>
         <li class="nav-item dropdown">
@@ -63,8 +63,8 @@
             <li><a class="dropdown-item" href="../edit-param/network/Link_midpoints/False/">Hide</a></li>
           </ul> -->
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" onclick="changeParam('network', 'Link_midpoints', true); getNetwork('{{network_data}}', '{{ colour_ref }}', '{{ conn_to_goal_legend }}')">Show</a></li>
-            <li><a class="dropdown-item" onclick="changeParam('network', 'Link_midpoints', false); getNetwork('{{network_data}}', '{{ colour_ref }}', '{{ conn_to_goal_legend }}')">Hide</a></li>
+            <li><a class="dropdown-item" onclick="changeParam('network', 'Link_midpoints', true); getNetwork('{{network_data}}', '{{ colour_ref }}', '{{ conn_to_goal_legend }}', '{{ legend_loop }}', '{{ legend_group }}')">Show</a></li>
+            <li><a class="dropdown-item" onclick="changeParam('network', 'Link_midpoints', false); getNetwork('{{network_data}}', '{{ colour_ref }}', '{{ conn_to_goal_legend }}', '{{ legend_loop }}', '{{ legend_group }}')">Hide</a></li>
           </ul>  
         </li>
         <li class="nav-item dropdown">
@@ -72,9 +72,9 @@
             Labels
           </a>
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" onclick="changeParam('network', 'Labels', 'No labels'); getNetwork('{{network_data}}', '{{ colour_ref }}', '{{ conn_to_goal_legend }}')">No labels</a></li>
-            <li><a class="dropdown-item" onclick="changeParam('network', 'Labels', 'Short labels'); getNetwork('{{network_data}}', '{{ colour_ref }}', '{{ conn_to_goal_legend }}')">Short labels</a></li>
-            <li><a class="dropdown-item" onclick="changeParam('network', 'Labels', 'Full labels'); getNetwork('{{network_data}}', '{{ colour_ref }}', '{{ conn_to_goal_legend }}')">Full labels</a></li>
+            <li><a class="dropdown-item" onclick="changeParam('network', 'Labels', 'No labels'); getNetwork('{{network_data}}', '{{ colour_ref }}', '{{ conn_to_goal_legend }}', '{{ legend_loop }}', '{{ legend_group }}')">No labels</a></li>
+            <li><a class="dropdown-item" onclick="changeParam('network', 'Labels', 'Short labels'); getNetwork('{{network_data}}', '{{ colour_ref }}', '{{ conn_to_goal_legend }}', '{{ legend_loop }}', '{{ legend_group }}')">Short labels</a></li>
+            <li><a class="dropdown-item" onclick="changeParam('network', 'Labels', 'Full labels'); getNetwork('{{network_data}}', '{{ colour_ref }}', '{{ conn_to_goal_legend }}', '{{ legend_loop }}', '{{ legend_group }}')">Full labels</a></li>
           </ul>  
         </li> 
     

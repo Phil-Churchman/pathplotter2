@@ -32,7 +32,7 @@
               <li><a class="dropdown-item" href="/upload-file/">Import legacy file (JSON)</a></li>
             </ul>
           </li>
-          {% if version_not_selected %}
+          <!-- {% if version_not_selected %}
 
         
           {% else %}
@@ -41,7 +41,7 @@
             <a class="nav-link" aria-current="page" href="/standardise_nodes/">Standardise nodes</a>
           </li>               
           {% endif %}
-          {% endif %}
+          {% endif %} -->
         </ul>
       </div>
     </div>
@@ -55,24 +55,41 @@
  
 <table class="table table-borderless align-middle w-auto">
 
-  <th scope="col" style="width: 300px"></th>
+
+  <th scope="col"></th>
+  <th scope="col"></th>
+  <th scope="col"></th>
+  <th scope="col"></th>
+  <th scope="col" style="width: 350px"></th>
   <!-- <th scope="col">Number</th> -->
   <!-- <th scope="col"></th> -->
-  <th scope="col"></th>
-  <th scope="col"></th>
-  <th scope="col"></th>
-  <th scope="col"></th>
-  <th scope="col"></th>
+
   <!-- <th scope="col"></th> -->
 {% for x in versions %}
 {% if x.current %}
-  <tr class="table-active">
+  <tr id="version{{x.id}}" class="table-active">
   {% else %}
-  <tr>  
+  <tr id="version{{x.id}}" class="">  
   {% endif %}
-
+  <td><form action="/edit-version/{{x.id}}" onsubmit="showPleaseWait()">
+    <!-- <button type="submit" class="btn btn-secondary btn-sm">Edit</button> -->
+    <input type="image" name="submit" src="/static/icons/pencil.svg" alt="Submit" style="width:20px;height:auto;"/>
+  </form></td>
+  <td><form action="/archive-version/{{x.id}}" onsubmit="showPleaseWait()">
+    <!-- <button type="submit" class="btn btn-secondary btn-sm">Archive</button> -->
+    <input type="image" name="submit" src="/static/icons/archive.svg" alt="Submit" style="width:20px;height:auto;" />
+  </form></td>
+  <td><form action="/copy-version/{{x.id}}" onsubmit="showPleaseWait()">
+    <!-- <button type="submit" class="btn btn-secondary btn-sm">Delete</button> -->
+    <input type="image" name="submit" src="/static/icons/copy.svg" alt="Submit" style="width:20px;height:auto;"  />
+    <!-- <img src = "/static/icons/trash3.svg" style="width:20px;height:auto;" type="submit"> -->
+  </form></td>
 <td>
-  <a href="/set-version/{{x.id}}" onclick="showPleaseWait()" class="link-offset-2 link-underline link-underline-opacity-0">{{x.name}}</a>
+  <!-- <a href="/set-version/{{x.id}}" onclick="showPleaseWait()" class="link-offset-2 link-underline link-underline-opacity-0">{{x.name}}</a> -->
+  <a href="#" onclick='setversionAJAX({"id": {{x.id}}})' class="link-offset-2 link-underline link-underline-opacity-0">{{x.name}}</a>
+  
+
+
 </td>
 <!-- <td>
   <a>{{x.number}}</a>
@@ -86,19 +103,7 @@
 <!-- <td><form action="/set-version/{{x.id}}" onsubmit="showPleaseWait()">
   <input type="image" name="submit" src="/static/icons/check2-circle.svg" alt="Submit" style="width:20px;height:auto;"/>
 </form></td> -->
-<td><form action="/edit-version/{{x.id}}" onsubmit="showPleaseWait()">
-  <!-- <button type="submit" class="btn btn-secondary btn-sm">Edit</button> -->
-  <input type="image" name="submit" src="/static/icons/pencil.svg" alt="Submit" style="width:20px;height:auto;"/>
-</form></td>
-<td><form action="/archive-version/{{x.id}}" onsubmit="showPleaseWait()">
-  <!-- <button type="submit" class="btn btn-secondary btn-sm">Archive</button> -->
-  <input type="image" name="submit" src="/static/icons/archive.svg" alt="Submit" style="width:20px;height:auto;" />
-</form></td>
-<td><form action="/copy-version/{{x.id}}" onsubmit="showPleaseWait()">
-  <!-- <button type="submit" class="btn btn-secondary btn-sm">Delete</button> -->
-  <input type="image" name="submit" src="/static/icons/copy.svg" alt="Submit" style="width:20px;height:auto;"  />
-  <!-- <img src = "/static/icons/trash3.svg" style="width:20px;height:auto;" type="submit"> -->
-</form></td>
+
 
   <!-- <td><form action="/update_loops/{{x.id}}">
   <button type="submit" class="btn btn-secondary btn-sm">Update loops</button>
@@ -107,8 +112,6 @@
 </tr>
 {% endfor %}
 </table>
-
-
 
 <p></p>
 </div>

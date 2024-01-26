@@ -48,12 +48,49 @@ class NodeStandard(models.Model):
         return f"{self.code}: {self.name}"
 
     class Meta:
+        unique_together = ['code', 'name']
         ordering = ["code", "name"]
+
+class LinkStandard(models.Model):
+        
+    from_node = models.ForeignKey(NodeStandard, on_delete=models.CASCADE, related_name='from_node', default=None)
+    to_node = models.ForeignKey(NodeStandard, on_delete=models.CASCADE, related_name='to_node', default=None)
+
+    def __str__(self):
+        return f"{self.from_node.code}: {self.from_node.name} to {self.to_node.code}: {self.to_node.name}"
+
+
+    class Meta:
+        unique_together = ['from_node', 'to_node']
+        ordering = ["from_node", "to_node"]
+
 
 class Node(models.Model):
 
     # def get_default_node_standard():
     #     return NodeStandard.objects.get(name="Not defined").id
+    
+    # def clean(self):
+        
+
+    #     node_code_check = Node.objects.filter(version=self.version, node_code=self.node_code, category=self.category)
+    #     node_text_check = Node.objects.filter(version=self.version, node_text=self.node_text, category=self.category)
+
+    #     if self.id == None:
+    #         if node_code_check.count() != 0:
+    #             raise ValidationError('Node with with category and node code already exists.')
+    #         if node_text_check.count() != 0:
+    #             raise ValidationError('Node with with category and node text already exists.') 
+        
+    #     else:
+    #         if node_code_check.count() == 1:
+    #             if node_code_check[0].id != self.id:
+    #                 raise ValidationError('Node with with category and node code already exists.')   
+    #         if node_text_check.count() == 1:
+    #             if node_text_check[0].id != self.id:
+    #                 raise ValidationError('Node with with category and node text already exists.')             
+
+
 
     version = models.ForeignKey(Version, on_delete=models.CASCADE, default="1")
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
@@ -72,9 +109,15 @@ class Node(models.Model):
     # node_standard = models.ForeignKey(NodeStandard, null=True, blank=True, default=get_default_node_standard, on_delete=models.SET_DEFAULT)
     node_standard = models.ForeignKey(NodeStandard, null=True, blank=True, on_delete=models.SET_NULL)
     copied_to = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL)
+    temp = models.BooleanField(default=False)
 
     class Meta:
-        unique_together = ['node_code', 'category', 'version']
+        # constraints = [
+        #     models.UniqueConstraint(fields=['node_code', 'category', 'version', 'temp'], name = "unique_node_code"),
+        #     models.UniqueConstraint(fields=['node_text', 'category', 'version', 'temp'], name = "unique_node_text")
+        # ]
+        unique_together = ['node_code', 'category', 'version', 'temp']
+        unique_together = ['node_text', 'category', 'version', 'temp']
         ordering = ["category", "node_code"]
 
     def __str__(self):

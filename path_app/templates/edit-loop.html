@@ -30,9 +30,9 @@
 <div class="container">
 <p></p>
 <a>Links:</a>
-<ul style="list-style: none; text-align: left;">
+<ul class="list-group list-group-flush">
 {% for x in links %}
-<li><a href="/edit-link/{{x.id}}" class="link-offset-2 link-underline link-underline-opacity-0">{{ x.from_node }} - {{ x.to_node }}</a></li>
+<li class="list-group-item"><a href="/edit-link/{{x.id}}" class="link-offset-2 link-underline link-underline-opacity-0">{{ x.from_node }} - {{ x.to_node }}</a></li>
 {% endfor %}
 </ul>
 <p></p>

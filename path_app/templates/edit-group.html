@@ -25,9 +25,9 @@
 <div class="container">
 <p></p>
 <a>Loops:</a>
-<ul style="list-style: none; text-align: left;">
+<ul class="list-group list-group-flush">
 {% for x in loops %}
-<li><a href="/edit-loop/{{x.id}}" class="link-offset-2 link-underline link-underline-opacity-0">{{x}}</a></li>
+<li class="list-group-item"><a href="/edit-loop/{{x.id}}" class="link-offset-2 link-underline link-underline-opacity-0">{{x}}</a></li>
 {% endfor %}
 </ul>
 <p></p>

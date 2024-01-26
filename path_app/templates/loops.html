@@ -24,6 +24,7 @@
               <li><a class="dropdown-item" href="/edit-param/network/Model_choice/EF/" onclick="showPleaseWait()">Efficient</a></li>
             </ul>
           </li>
+          
           <!-- <li class="nav-item">
             <a class="nav-link" aria-current="page" href="/loops/" onclick="showPleaseWait()">Update loops</a>
           </li>  -->
@@ -40,10 +41,12 @@
 
 <div class="container">
   <p></p>
+  
   <form method="post" action="/enabled_loops_only/"> 
-    <a>Enabled loops only: </a>
+ 
+    <a style="display:inline-block; vertical-align: middle; padding-right: 30px;">Enabled loops only:</a>
     {% csrf_token %} 
-  <div class="form-check form-switch">
+  <div class="form-check form-switch" style="display:inline-block; vertical-align: middle">
     {% if enabled_loops_only %}
     <!-- <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" onchange=this.form.submit() checked> -->
     <!-- <input class="form-check-input" id="flexSwitchCheckDefault" type="checkbox" value="{{x.id}}" onchange=this.form.requestSubmit() checked > -->
@@ -55,24 +58,28 @@
     {% endif %}
   </div>
 </div>
+
 </form>
 
 
 <table class="table table-borderless align-middle w-auto mt-3">
   <thead>
     <tr>
-  
-  <th scope="col"  style="width: 300px">Loop</th>
-  <th scope="col" class="text-center">Group</th>
-  <th scope="col"></th>
+      <th scope="col" class="text-center"></th>
+      <th scope="col"></th>  
+  <th scope="col"  style="width: 300px"></th>
+
   </tr>
 </thead>
 <tbody>
+  <tr>
+    <td class="text-center">
+      <a>Group</a>
+    </td>
+  </tr>
 {% for x in loops %}
 <tr>
-  <td>
-    <a>{{x.loop_code}}</a>
-    </td>
+
     <td>
       <div class="container" style="align-items: center;">
         <form method="post" id="group_loop{{x.id}}">
@@ -104,7 +111,9 @@
   <input type="image" name="submit" src="/static/icons/pencil.svg" alt="Submit" style="width:20px;height:auto;"/>
 
 </form></td>
-
+<td>
+  <a>{{x.loop_code}}</a>
+  </td>
 
 </tr>
 {% endfor %}
