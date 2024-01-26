@@ -8,6 +8,7 @@ import copy, math
 from .loops import get_loops
 import django.apps
 import pandas as pd
+import os
 
 network_lookup = {
 "Model choice": "Model_choice",
@@ -97,78 +98,78 @@ gantt_lookup = {
 "Enabled only" : "Enabled_only",
 "Apply groups" : "Apply_groups"
 }
-node_standard = [
-("-",	"Not defined"),
-(">",	"Road freight decarbonisation goal"),
-("1",	"Align energy, infrastructure, vehicle timelines"),
-("1",	"Align to vehicle replacement cycles / used market"),
-("1",	"Clear cut off dates / targets"),
-("1",	"Deliver quick wins (e.g. fridges)"),
-("1",	"Front load long lead time activities"),
-("1",	"Prioritise freight applications"),
-("2",	"Align solutions to operation requirements"),
-("2",	"Ancillary equipment power solutions"),
-("2",	"Define technology standards"),
-("2",	"E-fuel yes-no"),
-("2",	"ERS yes-no"),
-("2",	"Full system cost and emissions view"),
-("2",	"H2 yes-no"),
-("2",	"Motive technology choice per freight application"),
-("2",	"Select energy storage solution(s) - H2 or other"),
-("2",	"Select solutions based on cost and efficiency"),
-("2",	"Wait for new battery solutions yes-no"),
-("3",	"Charging / fuelling capacity / coverage"),
-("3",	"Define infrastructure funding / who pays"),
-("3",	"Infrastructure sharing"),
-("3",	"Land allocation for infrastructure"),
-("3",	"National energy / DNO capacity / connection prioritisation"),
-("3",	"Define split of destination vs depot vs on route charging"),
-("4",	"Create incentives for leasing companies"),
-("4",	"Create incentives for operators"),
-("4",	"Create incentives for public authorities"),
-("4",	"Create incentives for infrastructure providers"),
-("4",	"Disincentivise fossil fuels"),
-("4",	"Establish government / industry partnerships"),
-("4",	"Implement emissions monitoring / VECTO"),
-("4",	"Provide green project / innovation support"),
-("4",	"Provide incentive duration guarantee"),
-("4",	"Secure incentive funding"),
-("4",	"Tax regime supporting green transport"),
-("5",	"Align planning process / regulations / speed"),
-("5",	"Develop operator skills / capacity"),
-("5",	"Collaboration between authorities"),
-("5",	"Develop government / planning skills / capacity"),
-("5",	"Develop maintenance and repair facilities"),
-("5",	"Secure authority capability / capacity funding"),
-("B",	"Battery range"),
-("B",	"Collaboration barriers / competition"),
-("B",	"Competition for public funds"),
-("B",	"Coordination complexity"),
-("B",	"Cost of charging on route"),
-("B",	"First mover disadvantage"),
-("B",	"Green H2 / alternative fuel supply"),
-("B",	"Higher TCO"),
-("B",	"Impacts on vehicle capacity"),
-("B",	"Infrastructure chicken and egg"),
-("B",	"Lack of customer demand for decarbonisation"),
-("B",	"Policy uncertainty"),
-("B",	"SME viability of new solutions"),
-("B",	"Technology uncertainty / confidence"),
-("B",	"Vehicle availability / supply risk / cost"),
-("E",	"Corporate ESG goals"),
-("E",	"Decouple transport energy price from markets"),
-("E",	"Electricity supply decarbonisation"),
-("E",	"Last mile innovation / solutions"),
-("E",	"National energy / transport strategy"),
-("E",	"New vehicle delivery models (e.g. OEM turnkey)"),
-("E",	"Local / national political / policy support"),
-("E",	"Potential vehicle retrofitting"),
-("E",	"Public / operator awareness raising"),
-("E",	"Shared / aggregate data"),
-("E",	"Trials / early adopter experience"),
-("E",	"Working condition regulation (last mile)"),
-("E",   "Decarbonisation framework principles per operator type"),
-]
+# node_standard = [
+# ("-",	"Not defined"),
+# (">",	"Road freight decarbonisation goal"),
+# ("1",	"Align energy, infrastructure, vehicle timelines"),
+# ("1",	"Align to vehicle replacement cycles / used market"),
+# ("1",	"Clear cut off dates / targets"),
+# ("1",	"Deliver quick wins (e.g. fridges)"),
+# ("1",	"Front load long lead time activities"),
+# ("1",	"Prioritise freight applications"),
+# ("2",	"Align solutions to operation requirements"),
+# ("2",	"Ancillary equipment power solutions"),
+# ("2",	"Define technology standards"),
+# ("2",	"E-fuel yes-no"),
+# ("2",	"ERS yes-no"),
+# ("2",	"Full system cost and emissions view"),
+# ("2",	"H2 yes-no"),
+# ("2",	"Motive technology choice per freight application"),
+# ("2",	"Select energy storage solution(s) - H2 or other"),
+# ("2",	"Select solutions based on cost and efficiency"),
+# ("2",	"Wait for new battery solutions yes-no"),
+# ("3",	"Charging / fuelling capacity / coverage"),
+# ("3",	"Define infrastructure funding / who pays"),
+# ("3",	"Infrastructure sharing"),
+# ("3",	"Land allocation for infrastructure"),
+# ("3",	"National energy / DNO capacity / connection prioritisation"),
+# ("3",	"Define split of destination vs depot vs on route charging"),
+# ("4",	"Create incentives for leasing companies"),
+# ("4",	"Create incentives for operators"),
+# ("4",	"Create incentives for public authorities"),
+# ("4",	"Create incentives for infrastructure providers"),
+# ("4",	"Disincentivise fossil fuels"),
+# ("4",	"Establish government / industry partnerships"),
+# ("4",	"Implement emissions monitoring / VECTO"),
+# ("4",	"Provide green project / innovation support"),
+# ("4",	"Provide incentive duration guarantee"),
+# ("4",	"Secure incentive funding"),
+# ("4",	"Tax regime supporting green transport"),
+# ("5",	"Align planning process / regulations / speed"),
+# ("5",	"Develop operator skills / capacity"),
+# ("5",	"Collaboration between authorities"),
+# ("5",	"Develop government / planning skills / capacity"),
+# ("5",	"Develop maintenance and repair facilities"),
+# ("5",	"Secure authority capability / capacity funding"),
+# ("B",	"Battery range"),
+# ("B",	"Collaboration barriers / competition"),
+# ("B",	"Competition for public funds"),
+# ("B",	"Coordination complexity"),
+# ("B",	"Cost of charging on route"),
+# ("B",	"First mover disadvantage"),
+# ("B",	"Green H2 / alternative fuel supply"),
+# ("B",	"Higher TCO"),
+# ("B",	"Impacts on vehicle capacity"),
+# ("B",	"Infrastructure chicken and egg"),
+# ("B",	"Lack of customer demand for decarbonisation"),
+# ("B",	"Policy uncertainty"),
+# ("B",	"SME viability of new solutions"),
+# ("B",	"Technology uncertainty / confidence"),
+# ("B",	"Vehicle availability / supply risk / cost"),
+# ("E",	"Corporate ESG goals"),
+# ("E",	"Decouple transport energy price from markets"),
+# ("E",	"Electricity supply decarbonisation"),
+# ("E",	"Last mile innovation / solutions"),
+# ("E",	"National energy / transport strategy"),
+# ("E",	"New vehicle delivery models (e.g. OEM turnkey)"),
+# ("E",	"Local / national political / policy support"),
+# ("E",	"Potential vehicle retrofitting"),
+# ("E",	"Public / operator awareness raising"),
+# ("E",	"Shared / aggregate data"),
+# ("E",	"Trials / early adopter experience"),
+# ("E",	"Working condition regulation (last mile)"),
+# ("E",   "Decarbonisation framework principles per operator type"),
+# ]
 
 gantt_export = [
 "Plot height", 
@@ -220,9 +221,35 @@ def check_db():
                 j.delete()
             for j in ref_models[i]:
                 i.objects.create(option=j)
+    
+    f = open(os.path.join('pathplotter','NodeStandard.json'))
+    node_list = json.load(f)
+    f.close()
+    f = open(os.path.join('pathplotter','LinkStandard.json'))
+    link_list = json.load(f)
+    f.close()   
+    node_standard = [(i["code"], i["name"]) for i in node_list]  
     for i in node_standard:
         if NodeStandard.objects.filter(code=i[0], name=i[1]).count() == 0:
             NodeStandard.objects.create(code=i[0], name=i[1])
+    for i in link_list:
+        from_found = False
+        to_found = False
+        for j in node_list:
+            if i["from_node"] == j["id"]:
+                from_node_code = j["code"]
+                from_node_name = j["name"]
+                from_found = True
+            if i["to_node"] == j["id"]:
+                to_node_code = j["code"]
+                to_node_name = j["name"]
+                to_found = True
+            if from_found and to_found: break
+        from_node = NodeStandard.objects.get(code=from_node_code,name=from_node_name)
+        to_node = NodeStandard.objects.get(code=to_node_code,name=to_node_name)
+        if LinkStandard.objects.filter(from_node=from_node, to_node=to_node).count() == 0:
+            LinkStandard.objects.create(from_node=from_node, to_node=to_node)
+
 # Current
 
 @login_required
