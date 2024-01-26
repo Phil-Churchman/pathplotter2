@@ -33,14 +33,14 @@
 {% block content %}
 <div class="container">   
 
-<table class="table table-borderless align-middle w-auto mt-2">
+<table class="table table-borderless align-middle w-auto">
 
-  <th scope="col"></th>
-  <th scope="col"></th>
+  <th></th>
+  <th></th>
   {% if superuser %}
   <th></th>
   {% endif %}
-  <th scope="col"></th>
+  <th></th>
 
   <th scope="col" colspan=2 style="width: 400px">From node</th>
 
@@ -104,29 +104,29 @@
       <input type="image" src="/static/icons/trash3.svg" value='{"id": {{x.id}}, "ob_type": "link", "backup": true}' onclick="delAJAX(this.value)" style="width:20px;height:auto;"/>
     </form>
     </td>
-  <td>
-    <div class="container" style="align-items: center;">
+  <td style="padding-right:0px; padding-left:10px">
+
     <!-- <form action="/switch/link/{{x.id}}"> -->
     <form method="post" id="switch"> 
       {% csrf_token %} 
-    <div class="form-check form-switch">
+    <div class="form-check form-switch" style="align-items: center; text-align:center">
       {% if x.enabled %}
       <!-- <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" onchange=this.form.submit() checked> -->
       <!-- <input class="form-check-input" id="flexSwitchCheckDefault" type="checkbox" value="{{x.id}}" onchange=this.form.requestSubmit() checked > -->
-      <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" value='{"id": {{x.id}}, "ob_type": "link"}' onchange="saveSwitch(this.value)" checked>
+      <input class="form-check-input" style="align-items: center; text-align:center" type="checkbox" id="flexSwitchCheckDefault" value='{"id": {{x.id}}, "ob_type": "link"}' onchange="saveSwitch(this.value)" checked>
       {% else %}
       <!-- <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" onchange=this.form.submit()> -->
       <!-- <input class="form-check-input" id="flexSwitchCheckDefault" type="checkbox" value="{{x.id}}" onchange=this.form.requestSubmit()> -->
-      <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" value='{"id": {{x.id}}, "ob_type": "link"}' onchange="saveSwitch(this.value)">
+      <input class="form-check-input" style="align-items: center; text-align:center" type="checkbox" id="flexSwitchCheckDefault" value='{"id": {{x.id}}, "ob_type": "link"}' onchange="saveSwitch(this.value)">
       {% endif %}
-    </div>
+
   </div>
   </form>
   
   </td>
   
   {% if superuser %}
-  <td>
+  <td >
   <form id="standard{{x.id}}" onsubmit="return false;">
     <input type="image" src="/static/icons/share.svg" value='{"id": {{x.id}}}' onclick="standardAJAX(this.value)" style="width:20px;height:auto;"/>
   </form>
@@ -142,13 +142,13 @@
  
 
 
-<td style="width: 50px">
+<td style="padding-left:20px">
   <a>{{x.from_node.category.category_code}}:{{x.from_node.node_code}}</a>
 </td>  
 <td>
 <a>{{x.from_node.node_text}}</a>
 </td>
-<td style="width: 50px">
+<td style="padding-left:20px">
   <a>{{x.to_node.category.category_code}}:{{x.to_node.node_code}}</a>
 </td>
 <td>

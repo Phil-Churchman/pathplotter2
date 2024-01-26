@@ -29,24 +29,25 @@
 {% block content %}
 <div class="container"> 
 
-<table class="table table-responsive table-borderless align-middle w-auto mt-2">
+<table class="table table-borderless align-middle w-auto">
+
+  <th scope="col"></th>
+  <th scope="col"></th>
+  <th scope="col"></th>
+  <th scope="col"></th>
+  <th scope="col"></th>
 
 
-  <tr>
-    <td></td>
-    <td>Enabled</td>
-
-  </tr>
 {% for x in categories %}
 <tr id="row{{x.id}}">
 {% if x.editable %}
-<td>
+<td style="padding:0px">
   <form id="del{{x.id}}" onsubmit="return false;">
 
-    <input type="image" src="/static/icons/trash3.svg" value='{"id": {{x.id}}, "ob_type": "category", "backup": true}' onclick="delAJAX(this.value)" style="width:20px;height:auto;"/>
+    <input type="image" src="/static/icons/trash3.svg" value='{"id": {{x.id}}, "ob_type": "category", "backup": true}' onclick="delAJAX(this.value)" style="width:20px;height:auto;align-items:center"/>
   </form>
   </td>
-<td>
+<td style="padding-right:0px; padding-left:10px">
   <div class="container">
   <form method="post" id="switch">
   <div class="form-check form-switch">
@@ -62,9 +63,9 @@
 </div>
 </td>
 
-  <td class="text-center"><form action="/edit-category/{{x.id}}" onsubmit="showPleaseWait()">
+  <td  style="padding:0px"><form action="/edit-category/{{x.id}}" onsubmit="showPleaseWait()">
 
-  <input type="image" name="submit" src="/static/icons/pencil.svg" alt="Submit" style="width:20px;height:auto;"  />
+  <input type="image" name="submit" src="/static/icons/pencil.svg" alt="Submit" style="width:20px;height:auto;align-items:center"  />
 </form></td>
 
 {% else %}
@@ -73,7 +74,7 @@
 <td></td>
 {% endif %}
 
-<td style="width: 20px">
+<td style="padding-left:20px">
   <a>{{x.category_code}}</a>
 </td>
 <td>

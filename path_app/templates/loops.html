@@ -62,7 +62,7 @@
 </form>
 
 
-<table class="table table-borderless align-middle w-auto mt-3">
+<table class="table table-borderless align-middle w-auto">
   <thead>
     <tr>
       <th scope="col" class="text-center"></th>
@@ -80,7 +80,7 @@
 {% for x in loops %}
 <tr>
 
-    <td>
+    <td style="padding-right:0px; padding-left:10px">
       <div class="container" style="align-items: center;">
         <form method="post" id="group_loop{{x.id}}">
           <div class="form-check form-switch">
@@ -111,7 +111,7 @@
   <input type="image" name="submit" src="/static/icons/pencil.svg" alt="Submit" style="width:20px;height:auto;"/>
 
 </form></td>
-<td>
+<td style="padding-left:20px">
   <a>{{x.loop_code}}</a>
   </td>
 

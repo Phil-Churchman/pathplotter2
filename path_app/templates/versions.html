@@ -60,11 +60,8 @@
   <th scope="col"></th>
   <th scope="col"></th>
   <th scope="col"></th>
-  <th scope="col" style="width: 350px"></th>
-  <!-- <th scope="col">Number</th> -->
-  <!-- <th scope="col"></th> -->
+  <th scope="col"></th>
 
-  <!-- <th scope="col"></th> -->
 {% for x in versions %}
 {% if x.current %}
   <tr id="version{{x.id}}" class="table-active">
@@ -90,26 +87,6 @@
   <a href="#" onclick='setversionAJAX({"id": {{x.id}}})' class="link-offset-2 link-underline link-underline-opacity-0">{{x.name}}</a>
   
 
-
-</td>
-<!-- <td>
-  <a>{{x.number}}</a>
-</td> -->
-<!-- <td style="text-align: center;">
-  {% if x.current %}
-  <img src = "/static/icons/check.svg" style="width:20px;height:auto;">
-  {% endif %}
-</td> -->
-
-<!-- <td><form action="/set-version/{{x.id}}" onsubmit="showPleaseWait()">
-  <input type="image" name="submit" src="/static/icons/check2-circle.svg" alt="Submit" style="width:20px;height:auto;"/>
-</form></td> -->
-
-
-  <!-- <td><form action="/update_loops/{{x.id}}">
-  <button type="submit" class="btn btn-secondary btn-sm">Update loops</button>
-</form></td> -->
-<td>
 </tr>
 {% endfor %}
 </table>

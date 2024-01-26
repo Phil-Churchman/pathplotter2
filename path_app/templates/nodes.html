@@ -34,13 +34,17 @@
 {% block content %}
 <div class="container">
 
-<table class="table table-borderless align-middle w-auto mt-2">
+<table class="table table-borderless align-middle w-auto">
 
-<tbody>
+  <th scope="col"></th>
+  <th scope="col"></th>
+  <th scope="col"></th>
+  <th scope="col"></th>
+  <th scope="col"></th>
+
+
   <tr>
       <td></td>
-      <td class="text-center">
-        </td>
       <td></td>
       <td></td>
     <td colspan=2>
@@ -58,12 +62,12 @@
         </ul>
       </div>
     </td>
-
+  </tr>
     {% for x in nodes %}
 
 
 <tr id="row{{x.id}}">
-  <td class="text-center">
+  <td style="padding:0px">
     <form id="del{{x.id}}" onsubmit="return false;">
     <!-- {% csrf_token %} -->
     <!-- <input type="hidden" id="del_node" type="text" name="del_node" value={{x.id}}> -->
@@ -71,10 +75,10 @@
     <input type="image" src="/static/icons/trash3.svg" value='{"id": {{x.id}}, "ob_type": "node", "backup": true}' onclick="delAJAX(this.value)" style="width:20px;height:auto;"/>
   </form>
   </td>
-  <td>
-    <div class="container" style="align-items: center;">
+  <td style="padding-right:0px; padding-left:10px">
+    <div class="container">
   <form method="post" id="switch{{x.id}}">
-    <div class="form-check form-switch">
+    <div class="form-check form-switch"  style="align-items: center; text-align:center">
       {% if x.enabled %}
       <!-- <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" onchange=this.form.submit() checked> -->
       <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" value='{"id": {{x.id}}, "ob_type": "node"}' onchange="saveSwitch(this.value)" checked>
@@ -87,7 +91,7 @@
   </div>
   </td>
 
-<td class="text-center"><form action="/edit-node/{{x.id}}" onsubmit="showPleaseWait()">
+<td style="padding:0px"><form action="/edit-node/{{x.id}}" onsubmit="showPleaseWait()">
   <!-- <button type="submit" class="btn btn-secondary btn-sm">Edit</button> -->
   <input type="image" name="submit" src="/static/icons/pencil.svg" alt="Submit" style="width:20px;height:auto;"/>
 </form></td>
@@ -99,7 +103,7 @@
 
 
 
-  <td style="width: 50px">
+  <td style="padding-left:20px">
     <a>{{x.category.category_code}}:{{x.node_code}}</a>
     </td>
 
@@ -109,7 +113,7 @@
 
 </tr>
 {% endfor %}
-</tbody>
+
 </table>
 
 

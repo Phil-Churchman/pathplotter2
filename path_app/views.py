@@ -187,7 +187,6 @@ def nodes(request, category):
         category_text = "All categories"
     else:
         category_text = Category.objects.get(id=category)
-        nodes = list(Node.objects.filter(version=version))
     categories = list(Category.objects.filter(version=version))   
 
     # try: 
