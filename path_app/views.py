@@ -13,6 +13,54 @@ import pickle
 import csv
 from io import StringIO
 import copy
+from .admin import *
+from django.apps import apps
+
+model_dict = {
+    CategoryResource: (True, "Category", Category),
+    NodeResource: (True, "Node", Node),
+    LinkResource: (True, "Link", Link),
+    GanttParamResource: (True, "GanttParam", GanttParam),
+    NetworkParamResource: (True, "NetworkParam", NetworkParam),
+    Enabled_select_optionResource: (False, "Enabled_select_option", Enabled_select_option),
+    Label_optionResource: (False, "Label_option", Label_option),
+    Auto_layout_optionResource: (False, "Auto_layout_option", Auto_layout_option),
+    Start_month_optionResource: (False, "Start_month_option", Start_month_option),
+    Start_year_optionResource: (False, "Start_year_option", Start_year_option),
+    Order_by_optionResource: (False, "Order_by_option", Order_by_option),
+    X_axis_optionResource: (False, "X_axis_option", X_axis_option),
+    Timing_optionResource: (False, "Timing_option", Timing_option),
+    Duration_optionResource: (False, "Duration_option", Duration_option),
+    NodeStandardResource: (False, "NodeStandard", NodeStandard),
+    LinkStandardResource: (False, "LinkStandard", LinkStandard),
+}
+
+model_list1 = [
+    ("Enabled_select_option", Enabled_select_option),
+    ("Label_option", Label_option),
+    ("Auto_layout_option", Auto_layout_option),
+    ("Start_month_option", Start_month_option),
+    ("Start_year_option", Start_year_option),
+    ("Order_by_option", Order_by_option),
+    ("X_axis_option", X_axis_option),
+    ("Timing_option", Timing_option),
+    ("Duration_option", Duration_option),
+    ("NodeStandard", NodeStandard),
+    # ("LinkStandard", LinkStandard)
+    ]
+
+model_list2 = [
+    ("LinkStandard", LinkStandard, ["from_node", "to_node"]),
+]
+
+model_list3 = [
+    
+    ("Category", Category, ["version"]),
+    ("Node", Node, ["category", "version", "node_standard"]),
+    ("Link", Link, ["version", "from_node", "to_node"]),
+    ("GanttParam", GanttParam, ["version", "Durations", "Timing", "Order_by", "Start_year", "Start_month_if_Month", "X_axis"]),
+    ("NetworkParam", NetworkParam, ["version", "Auto_layout", "Labels", "Enabled_select"])
+    ]
 
 
 @login_required
@@ -1701,6 +1749,134 @@ def import_snapshot(request):
         form = VersionForm(user=request.user, other_users=False, initial={"user": request.user})
         context['form'] = form
     return render(request, 'import_snapshot.html', context)
+
+@login_required
+def export_version(request):
+    [version, state, currentversion] = current_version(request)
+    if version == None:
+        return HttpResponseRedirect(state)
+
+    export_data={}
+
+    for i in model_dict.keys():
+        export_data[model_dict[i][1]] = []
+        if model_dict[i][0]:
+            queryset = model_dict[i][2].objects.filter(version = version)
+        else:
+            queryset = model_dict[i][2].objects.all()
+        for j in json.loads(i().export(queryset).json):
+            export_data[model_dict[i][1]].append(j)
+    
+    dataset = json.dumps(export_data, indent=4)
+    response = HttpResponse(dataset, content_type='application/json')
+    response['Content-Disposition'] = 'attachment; filename='+ version.name + '.json'
+    return response
+
+@login_required
+def import_version(request):
+
+    [v, state, currentversion] = current_version(request)
+
+    if request.method == 'POST':
+        form = VersionForm(request.POST, request.FILES, user=request.user, other_users=False)
+
+        if form.is_valid():
+            
+            if request.FILES:
+                myfile = request.FILES.get('myfile')
+                # try:
+                user=request.user
+                filedata = json.load(myfile)
+                version = form.save()
+                print(version)
+                if currentversion != None:
+                    currentversion.version = version
+                    currentversion.history = None
+                    currentversion.gantt_buffer = None
+                    currentversion.save()
+                
+                else:
+                    CurrentVersion.objects.create(user=request.user, version=version)
+                
+                # models = apps.get_models()
+                # for i in models:
+                #     print(i)
+                #     for j in i._meta.get_fields():
+                #         print(j.name)
+                
+                id_dict = {}
+                for i in model_list1:
+                    # print(i)
+                    # field_list = [j.name for j in i[1]._meta.get_fields()]
+                    # print(field_list)
+                    # field_list.remove("id")
+                    data_set = filedata[i[0]]
+                    # print(data_set)
+                    for j in data_set:
+
+                        filter_dict = {}
+                        for k in j.keys():
+                            if j == "id": continue
+                            filter_dict[k] = j[k]
+                        if i[1].objects.filter(**filter_dict).count() == 0:
+                            obj = i[1].objects.create(**filter_dict)
+                            id_dict[j["id"]] = obj.id
+                        else:
+                            id_dict[j["id"]] = i[1].objects.get(**filter_dict).id
+
+                for i in model_list2:
+                    data_set = filedata[i[0]]
+                    for j in data_set:
+                        filter_dict = {}
+                        for k in j.keys():
+                            if j == "id": continue
+                            if k in i[2]:
+                                ref_model = i[1]._meta.get_field(k).related_model
+                                filter_dict[k] = ref_model.objects.get(id=id_dict[j[k]])
+                            else:
+                                filter_dict[k] =  j[k]                   
+                        if i[1].objects.filter(**filter_dict).count() == 0:
+                            obj = i[1].objects.create(**filter_dict)
+                            id_dict[j["id"]] = obj.id
+                        else:
+                            id_dict[j["id"]] = i[1].objects.get(**filter_dict).id                    
+
+                for i in model_list3:
+                    data_set = filedata[i[0]]
+                    for j in data_set:
+                        filter_dict = {}
+                        filter_dict["version"] = version
+                        for k in j.keys():
+                            if k in ["id", "copied_to", "temp", "version"]: continue
+                            
+                            if k in i[2]:
+                                ref_model = i[1]._meta.get_field(k).related_model
+                                filter_dict[k] = ref_model.objects.get(id=id_dict[j[k]])
+                            else:
+                                filter_dict[k] = j[k]                   
+                        obj = i[1].objects.create(**filter_dict)
+                        id_dict[j["id"]] = obj.id
+
+
+
+                    # data_set = filedata[i[0]]
+                #     model = i[1]
+                #     fields = model._meta.get_fields().name
+                #     print(fields)
+                # # for j in data_set:
+                # except:
+                #     return HttpResponseRedirect("/versions_fail/")
+                add_backup(request, "generic")
+                return HttpResponseRedirect("/versions/")
+
+        context = {}
+        context['form'] = form
+        return render(request, 'import_version.html', context)
+    else:
+        context = {}
+        form = VersionForm(user=request.user, other_users=False, initial={"user": request.user})
+        context['form'] = form
+    return render(request, 'import_version.html', context)
 
 # Standardise nodes
 

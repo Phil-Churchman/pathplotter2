@@ -4,6 +4,51 @@ from import_export.admin import ImportExportModelAdmin
 from .models import *
 from .forms import *
 
+
+class CategoryResource(resources.ModelResource):
+    class Meta:
+        model = Category
+class NodeResource(resources.ModelResource):
+    class Meta:
+        model = Node
+class LinkResource(resources.ModelResource):
+    class Meta:
+        model = Link
+class GanttParamResource(resources.ModelResource):
+    class Meta:
+        model = GanttParam
+class NetworkParamResource(resources.ModelResource):
+    class Meta:
+        model = NetworkParam
+class Enabled_select_optionResource(resources.ModelResource):
+    class Meta:
+        model = Enabled_select_option
+class Label_optionResource(resources.ModelResource):
+    class Meta:
+        model = Label_option
+class Auto_layout_optionResource(resources.ModelResource):
+    class Meta:
+        model = Auto_layout_option
+class Start_month_optionResource(resources.ModelResource):
+    class Meta:
+        model = Start_month_option
+class Start_year_optionResource(resources.ModelResource):
+    class Meta:
+        model = Start_year_option
+class Order_by_optionResource(resources.ModelResource):
+    class Meta:
+        model = Order_by_option
+class X_axis_optionResource(resources.ModelResource):
+    class Meta:
+        model = X_axis_option
+class Timing_optionResource(resources.ModelResource):
+    class Meta:
+        model = Timing_option
+class Duration_optionResource(resources.ModelResource):
+    class Meta:
+        model = Duration_option
+
+
 class NodeStandardResource(resources.ModelResource):
 
     class Meta:

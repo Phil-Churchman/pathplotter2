@@ -138,4 +138,8 @@ urlpatterns = [
     path("add_link_standard/", views.add_link_standard, name="add_link_standard"),
 
     path("apply_link_standards/", views.apply_link_standards, name="apply_link_standards"),
+
+    path("export_version/", views.export_version, name="export_version"),
+
+    path("import_version/", views.import_version, name="import_version"),
 ]

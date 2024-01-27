@@ -64,7 +64,6 @@ class LinkStandard(models.Model):
         unique_together = ['from_node', 'to_node']
         ordering = ["from_node", "to_node"]
 
-
 class Node(models.Model):
 
     # def get_default_node_standard():
