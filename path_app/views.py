@@ -36,30 +36,30 @@ model_dict = {
 }
 
 model_list1 = [
-    ("Enabled_select_option", Enabled_select_option),
-    ("Label_option", Label_option),
-    ("Auto_layout_option", Auto_layout_option),
-    ("Start_month_option", Start_month_option),
-    ("Start_year_option", Start_year_option),
-    ("Order_by_option", Order_by_option),
-    ("X_axis_option", X_axis_option),
-    ("Timing_option", Timing_option),
-    ("Duration_option", Duration_option),
-    ("NodeStandard", NodeStandard),
+    ("Enabled_select_option", Enabled_select_option, [], ["option"]),
+    ("Label_option", Label_option, [], ["option"]),
+    ("Auto_layout_option", Auto_layout_option, [], ["option"]),
+    ("Start_month_option", Start_month_option, [], ["option"]),
+    ("Start_year_option", Start_year_option, [], ["option"]),
+    ("Order_by_option", Order_by_option, [], ["option"]),
+    ("X_axis_option", X_axis_option, [], ["option"]),
+    ("Timing_option", Timing_option, [], ["option"]),
+    ("Duration_option", Duration_option, [], ["option"]),
+    ("NodeStandard", NodeStandard, [], ["code", "name"]),
     # ("LinkStandard", LinkStandard)
     ]
 
 model_list2 = [
-    ("LinkStandard", LinkStandard, ["from_node", "to_node"]),
+    ("LinkStandard", LinkStandard, ["from_node", "to_node"], ["from_node", "to_node"]),
 ]
 
 model_list3 = [
     
-    ("Category", Category, ["version"]),
-    ("Node", Node, ["category", "version", "node_standard"]),
-    ("Link", Link, ["version", "from_node", "to_node"]),
-    ("GanttParam", GanttParam, ["version", "Durations", "Timing", "Order_by", "Start_year", "Start_month_if_Month", "X_axis"]),
-    ("NetworkParam", NetworkParam, ["version", "Auto_layout", "Labels", "Enabled_select"])
+    ("Category", Category, ["version"], ["version", "category_code"]),
+    ("Node", Node, ["category", "version", "node_standard"], ["version", "category", "node_code"]),
+    ("Link", Link, ["version", "from_node", "to_node"], ["version", "from_node", "to_node"]),
+    ("GanttParam", GanttParam, ["version", "Durations", "Timing", "Order_by", "Start_year", "Start_month_if_Month", "X_axis"], ["version"]),
+    ("NetworkParam", NetworkParam, ["version", "Auto_layout", "Labels", "Enabled_select"], ["version"])
     ]
 
 
@@ -1785,10 +1785,8 @@ def import_version(request):
             if request.FILES:
                 myfile = request.FILES.get('myfile')
                 # try:
-                user=request.user
                 filedata = json.load(myfile)
                 version = form.save()
-                print(version)
                 if currentversion != None:
                     currentversion.version = version
                     currentversion.history = None
@@ -1797,32 +1795,22 @@ def import_version(request):
                 
                 else:
                     CurrentVersion.objects.create(user=request.user, version=version)
-                
-                # models = apps.get_models()
-                # for i in models:
-                #     print(i)
-                #     for j in i._meta.get_fields():
-                #         print(j.name)
+
+                model_dict1 = {x[1]: (x[0], x[3]) for x in model_list1}
+                model_dict2 = {x[1]: (x[0], x[3]) for x in model_list2}
+                model_dict3 = {x[1]: (x[0], x[3]) for x in model_list3}
+                model_dict = {**model_dict1, **model_dict2, **model_dict3}
                 
                 id_dict = {}
                 for i in model_list1:
-                    # print(i)
-                    # field_list = [j.name for j in i[1]._meta.get_fields()]
-                    # print(field_list)
-                    # field_list.remove("id")
                     data_set = filedata[i[0]]
-                    # print(data_set)
                     for j in data_set:
-
                         filter_dict = {}
                         for k in j.keys():
-                            if j == "id": continue
+                            if k == "id": continue
                             filter_dict[k] = j[k]
                         if i[1].objects.filter(**filter_dict).count() == 0:
                             obj = i[1].objects.create(**filter_dict)
-                            id_dict[j["id"]] = obj.id
-                        else:
-                            id_dict[j["id"]] = i[1].objects.get(**filter_dict).id
 
                 # for i in model_list2:
                 #     data_set = filedata[i[0]]
@@ -1840,32 +1828,37 @@ def import_version(request):
                 #         else:
                 #             id_dict[j["id"]] = i[1].objects.get(**filter_dict).id                    
 
-                for i in model_list3:
-                    data_set = filedata[i[0]]
-                    for j in data_set:
-                        filter_dict = {}
-                        filter_dict["version"] = version
-                        for k in j.keys():
-                            if k in ["id", "copied_to", "temp", "version"]: continue
+                # for i in model_list3:
+                #     data_set = filedata[i[0]]
+                #     for j in data_set:
+                #         filter_dict = {}
+                #         filter_dict["version"] = version
+                #         for k in j.keys():
+                #             if k in ["id", "copied_to", "temp", "version"]: continue
                             
-                            if k in i[2]:
-                                ref_model = i[1]._meta.get_field(k).related_model
-                                filter_dict[k] = ref_model.objects.get(id=id_dict[j[k]])
-                            else:
-                                filter_dict[k] = j[k]                   
-                        obj = i[1].objects.create(**filter_dict)
-                        id_dict[j["id"]] = obj.id
+                #             if k in i[2]:
+                #                 ref_model = i[1]._meta.get_field(k).related_model
+                #                 ref_data_set = filedata[model_dict[ref_model][0]]
+                #                 for l in ref_data_set:
+                #                     if l["id"] == j[k]:
+                #                         ref_record = copy.deepcopy(l)
+                #                         break
+                #                 ref_dict = {}
+                #                 for l in list(model_dict[ref_model][1]):
+                #                     if l == "version":
+                #                         ref_dict["version"] = version
+                #                     else:
+                #                         ref_dict[l] = ref_record[l]
 
+                #                 print(ref_dict)
+                #                 print(ref_model)
+                #                 filter_dict[k] = ref_model.objects.get(**ref_dict)
+                #             else:
+                #                 filter_dict[k] = j[k]                   
+                #         obj = i[1].objects.create(**filter_dict)
+                #         id_dict[j["id"]] = obj.id
 
-
-                    # data_set = filedata[i[0]]
-                #     model = i[1]
-                #     fields = model._meta.get_fields().name
-                #     print(fields)
-                # # for j in data_set:
-                # except:
-                #     return HttpResponseRedirect("/versions_fail/")
-                add_backup(request, "generic")
+                # add_backup(request, "generic")
                 return HttpResponseRedirect("/versions/")
 
         context = {}
