@@ -1824,21 +1824,21 @@ def import_version(request):
                         else:
                             id_dict[j["id"]] = i[1].objects.get(**filter_dict).id
 
-                for i in model_list2:
-                    data_set = filedata[i[0]]
-                    for j in data_set:
-                        filter_dict = {}
-                        for k in j.keys():
-                            if k == "id": continue
-                            if k in i[2]:
-                                filter_dict[k] = NodeStandard.objects.get(id=id_dict[j[k]])
-                            else:
-                                filter_dict[k] =  j[k]
-                        if i[1].objects.filter(**filter_dict).count() == 0:
-                            obj = i[1].objects.create(**filter_dict)
-                            id_dict[j["id"]] = obj.id
-                        else:
-                            id_dict[j["id"]] = i[1].objects.get(**filter_dict).id                    
+                # for i in model_list2:
+                #     data_set = filedata[i[0]]
+                #     for j in data_set:
+                #         filter_dict = {}
+                #         for k in j.keys():
+                #             if k == "id": continue
+                #             if k in i[2]:
+                #                 filter_dict[k] = NodeStandard.objects.get(id=id_dict[j[k]])
+                #             else:
+                #                 filter_dict[k] =  j[k]
+                #         if i[1].objects.filter(**filter_dict).count() == 0:
+                #             obj = i[1].objects.create(**filter_dict)
+                #             id_dict[j["id"]] = obj.id
+                #         else:
+                #             id_dict[j["id"]] = i[1].objects.get(**filter_dict).id                    
 
                 for i in model_list3:
                     data_set = filedata[i[0]]
