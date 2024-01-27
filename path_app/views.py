@@ -1829,12 +1829,11 @@ def import_version(request):
                     for j in data_set:
                         filter_dict = {}
                         for k in j.keys():
-                            if j == "id": continue
+                            if k == "id": continue
                             if k in i[2]:
-                                ref_model = i[1]._meta.get_field(k).related_model
-                                filter_dict[k] = ref_model.objects.get(id=id_dict[j[k]])
+                                filter_dict[k] = NodeStandard.objects.get(id=id_dict[j[k]])
                             else:
-                                filter_dict[k] =  j[k]                   
+                                filter_dict[k] =  j[k]
                         if i[1].objects.filter(**filter_dict).count() == 0:
                             obj = i[1].objects.create(**filter_dict)
                             id_dict[j["id"]] = obj.id
