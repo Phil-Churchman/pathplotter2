@@ -108,28 +108,11 @@ def versions(request, **kwargs):
         fail_modal = True
     elif kwargs["modal"] == "gantt_error":
         gantt_error_modal = True
-    
-    # nodes = list(Node.objects.filter(version=version, enabled=True))
-    # categories = list(Category.objects.filter(version=version, enabled=True))
-    # for i in list(nodes):
-    #     if i.category not in categories:
-    #         i.delete()
-        
-    # nodes = list(Node.objects.filter(version=version))
-    # categories = list(Category.objects.filter(version=version))   
 
-    # try: 
-    #     node_standards = list(set([i.node_standard.code for i in nodes]))
-    #     category_codes = list(set([i.category_code for i in categories]))
-    #     standardise = True
-    #     for i in node_standards:
-    #         if i not in category_codes:
-    #             standardise=False
-    #             break
-    # except:
-    #     standardise = False
-
-    # standardise = True
+    if version != None:
+        version_name = version.name
+    else:
+        version_name = ""
 
     context = {
     # 'form': form,
@@ -139,7 +122,8 @@ def versions(request, **kwargs):
     # 'version_not_selected': len(versions) == 0,
 
     'fail_modal': fail_modal,
-    'gantt_error_modal': gantt_error_modal
+    'gantt_error_modal': gantt_error_modal,
+    'version': version_name
     }
     return HttpResponse(template.render(context, request))
 
@@ -153,6 +137,11 @@ def versions_archive(request):
     if currentversion != None:
         setattr(currentversion, "state", state)
         currentversion.save()
+    
+    if version != None:
+        version_name = version.name
+    else:
+        version_name = ""
     form = VersionForm
     for i in versions:
         if i == version:
@@ -164,7 +153,8 @@ def versions_archive(request):
     context = {
         'form': form,
         'versions': versions,
-        'version_not_selected': not check_version_selected(version)
+        'version_not_selected': not check_version_selected(version),
+        'version': version_name
         }
     return HttpResponse(template.render(context, request))
 
@@ -980,7 +970,6 @@ def add_version(request):
     context = {}
     form = VersionForm(user=request.user, other_users=False, initial={"user": request.user})
     context['form'] = form
-    context["version"] = version
     return render(request, 'add-version.html', context)
 
 # enable / disable
