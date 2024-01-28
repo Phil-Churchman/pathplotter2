@@ -35,33 +35,43 @@ model_dict = {
     LinkStandardResource: (False, "LinkStandard", LinkStandard),
 }
 
-model_list1 = [
-    ("Enabled_select_option", Enabled_select_option, [], ["option"]),
-    ("Label_option", Label_option, [], ["option"]),
-    ("Auto_layout_option", Auto_layout_option, [], ["option"]),
-    ("Start_month_option", Start_month_option, [], ["option"]),
-    ("Start_year_option", Start_year_option, [], ["option"]),
-    ("Order_by_option", Order_by_option, [], ["option"]),
-    ("X_axis_option", X_axis_option, [], ["option"]),
-    ("Timing_option", Timing_option, [], ["option"]),
-    ("Duration_option", Duration_option, [], ["option"]),
-    ("NodeStandard", NodeStandard, [], ["code", "name"]),
-    # ("LinkStandard", LinkStandard)
-    ]
+model_dict_import = {
+    "Enabled_select_option": ( Enabled_select_option, [], ["option"]),
+    "Label_option": ( Label_option, [], ["option"]),
+    "Auto_layout_option": ( Auto_layout_option, [], ["option"]),
+    "Start_month_option": ( Start_month_option, [], ["option"]),
+    "Start_year_option": ( Start_year_option, [], ["option"]),
+    "Order_by_option": ( Order_by_option, [], ["option"]),
+    "X_axis_option": ( X_axis_option, [], ["option"]),
+    "Timing_option": ( Timing_option, [], ["option"]),
+    "Duration_option": ( Duration_option, [], ["option"]),
+    "NodeStandard": ( NodeStandard, [], ["code", "name"]),
+    "LinkStandard": ( LinkStandard, ["from_node_standard", "to_node_standard"], ["from_node_standard", "to_node_standard"]),
+    "Category": ( Category, ["version"], ["version", "category_code"]),
+    "Node": ( Node, ["category", "version", "node_standard"], ["version", "category", "node_code"]),
+    "Link": ( Link, ["version", "from_node", "to_node"], ["version", "from_node", "to_node"]),
+    "GanttParam": ( GanttParam, ["version", "Durations", "Timing", "Order_by", "Start_year", "Start_month_if_Month", "X_axis"], ["version"]),
+    "NetworkParam": ( NetworkParam, ["version", "Auto_layout", "Labels", "Enabled_select"], ["version"])
+}
 
-model_list2 = [
-    ("LinkStandard", LinkStandard, ["from_node", "to_node"], ["from_node", "to_node"]),
-]
-
-model_list3 = [
+key_dict = {
+    "from_node": "Node",
+    "to_node": "Node",
+    "from_node_standard": "NodeStandard",
+    "to_node_standard": "NodeStandard",    
+    "category": "Category",
+    "Durations":"Duration_option",
+    "Timing": "Timing_option",
+    "Order_by": "Order_by_option",
+    "Start_year": "Start_year_option",
+    "Start_month_if_Month": "Start_month_option",
+    "X_axis":  "X_axis_option",
+    "Auto_layout": "Auto_layout_option",
+    "Labels": "Label_option",
+    "Enabled_select": "Enabled_select_option",
+    "node_standard": "NodeStandard",
     
-    ("Category", Category, ["version"], ["version", "category_code"]),
-    ("Node", Node, ["category", "version", "node_standard"], ["version", "category", "node_code"]),
-    ("Link", Link, ["version", "from_node", "to_node"], ["version", "from_node", "to_node"]),
-    ("GanttParam", GanttParam, ["version", "Durations", "Timing", "Order_by", "Start_year", "Start_month_if_Month", "X_axis"], ["version"]),
-    ("NetworkParam", NetworkParam, ["version", "Auto_layout", "Labels", "Enabled_select"], ["version"])
-    ]
-
+}
 
 @login_required
 def change_password(request):
@@ -1783,83 +1793,51 @@ def import_version(request):
         if form.is_valid():
             
             if request.FILES:
-                myfile = request.FILES.get('myfile')
-                # try:
-                filedata = json.load(myfile)
-                version = form.save()
-                if currentversion != None:
-                    currentversion.version = version
-                    currentversion.history = None
-                    currentversion.gantt_buffer = None
-                    currentversion.save()
-                
-                else:
-                    CurrentVersion.objects.create(user=request.user, version=version)
+                try:
+                    myfile = request.FILES.get('myfile')
+                    # try:
+                    filedata = json.load(myfile)
+                    version = form.save()
+                    if currentversion != None:
+                        currentversion.version = version
+                        currentversion.history = None
+                        currentversion.gantt_buffer = None
+                        currentversion.save()
+                    
+                    else:
+                        CurrentVersion.objects.create(user=request.user, version=version)
 
-                model_dict1 = {x[1]: (x[0], x[3]) for x in model_list1}
-                model_dict2 = {x[1]: (x[0], x[3]) for x in model_list2}
-                model_dict3 = {x[1]: (x[0], x[3]) for x in model_list3}
-                model_dict = {**model_dict1, **model_dict2, **model_dict3}
-                
-                id_dict = {}
-                for i in model_list1:
-                    data_set = filedata[i[0]]
-                    for j in data_set:
-                        filter_dict = {}
-                        for k in j.keys():
-                            if k == "id": continue
-                            filter_dict[k] = j[k]
-                        if i[1].objects.filter(**filter_dict).count() == 0:
-                            obj = i[1].objects.create(**filter_dict)
-
-                # for i in model_list2:
-                #     data_set = filedata[i[0]]
-                #     for j in data_set:
-                #         filter_dict = {}
-                #         for k in j.keys():
-                #             if k == "id": continue
-                #             if k in i[2]:
-                #                 filter_dict[k] = NodeStandard.objects.get(id=id_dict[j[k]])
-                #             else:
-                #                 filter_dict[k] =  j[k]
-                #         if i[1].objects.filter(**filter_dict).count() == 0:
-                #             obj = i[1].objects.create(**filter_dict)
-                #             id_dict[j["id"]] = obj.id
-                #         else:
-                #             id_dict[j["id"]] = i[1].objects.get(**filter_dict).id                    
-
-                # for i in model_list3:
-                #     data_set = filedata[i[0]]
-                #     for j in data_set:
-                #         filter_dict = {}
-                #         filter_dict["version"] = version
-                #         for k in j.keys():
-                #             if k in ["id", "copied_to", "temp", "version"]: continue
+                    id_dict = {}
+                    
+                    for i in model_dict_import.keys():
+                        records = filedata[i]
+                        for j in records:
                             
-                #             if k in i[2]:
-                #                 ref_model = i[1]._meta.get_field(k).related_model
-                #                 ref_data_set = filedata[model_dict[ref_model][0]]
-                #                 for l in ref_data_set:
-                #                     if l["id"] == j[k]:
-                #                         ref_record = copy.deepcopy(l)
-                #                         break
-                #                 ref_dict = {}
-                #                 for l in list(model_dict[ref_model][1]):
-                #                     if l == "version":
-                #                         ref_dict["version"] = version
-                #                     else:
-                #                         ref_dict[l] = ref_record[l]
+                                get_dict={}
+                                create_dict={}
+                                for k in j.keys():
+                                    if k in ["id", "copied_to", "temp"]:continue
+                                    if k == "version":
+                                        create_dict["version"] = version
+                                    elif k in model_dict_import[i][1]:
+                                        create_dict[k] = id_dict[(key_dict[k], j[k])]
+                                    else:
+                                        create_dict[k] = j[k]
+                                for k in create_dict.keys():
+                                    if k in model_dict_import[i][2]:
+                                        get_dict[k] = create_dict[k]
+                                if model_dict_import[i][0].objects.filter(**get_dict).count() == 0:
+                                    obj = model_dict_import[i][0].objects.create(**create_dict)
+                                    id_dict[(i, j["id"])] = obj
+                                else:
+                                    id_dict[(i, j["id"])] = model_dict_import[i][0].objects.get(**get_dict)
+                except:
+                    return HttpResponseRedirect("/versions_fail/")
 
-                #                 print(ref_dict)
-                #                 print(ref_model)
-                #                 filter_dict[k] = ref_model.objects.get(**ref_dict)
-                #             else:
-                #                 filter_dict[k] = j[k]                   
-                #         obj = i[1].objects.create(**filter_dict)
-                #         id_dict[j["id"]] = obj.id
-
-                # add_backup(request, "generic")
+                add_backup(request, "generic")
                 return HttpResponseRedirect("/versions/")
+
+        # "Node": ( Node, ["category", "version", "node_standard"], ["version", "category", "node_code"]),
 
         context = {}
         context['form'] = form
@@ -1867,6 +1845,7 @@ def import_version(request):
     else:
         context = {}
         form = VersionForm(user=request.user, other_users=False, initial={"user": request.user})
+
         context['form'] = form
     return render(request, 'import_version.html', context)
 
@@ -2006,10 +1985,10 @@ def add_link_standard(request):
         return render(request,html) 
     else:
         to_node_standard = NodeStandard.objects.get(code = link.to_node.category.category_code, name=link.to_node.node_text)    
-    if LinkStandard.objects.filter(from_node = from_node_standard, to_node = to_node_standard).count() != 0:
+    if LinkStandard.objects.filter(from_node_standard = from_node_standard, to_node_standard = to_node_standard).count() != 0:
         return render(request,html) 
     else:
-        LinkStandard.objects.create(from_node = from_node_standard, to_node = to_node_standard)
+        LinkStandard.objects.create(from_node_standard = from_node_standard, to_node_standard = to_node_standard)
         
     return render(request,html) 
 

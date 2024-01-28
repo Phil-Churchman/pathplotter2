@@ -247,8 +247,8 @@ def check_db():
             if from_found and to_found: break
         from_node = NodeStandard.objects.get(code=from_node_code,name=from_node_name)
         to_node = NodeStandard.objects.get(code=to_node_code,name=to_node_name)
-        if LinkStandard.objects.filter(from_node=from_node, to_node=to_node).count() == 0:
-            LinkStandard.objects.create(from_node=from_node, to_node=to_node)
+        if LinkStandard.objects.filter(from_node_standard=from_node, to_node_standard=to_node).count() == 0:
+            LinkStandard.objects.create(from_node_standard=from_node, to_node_standard=to_node)
 
 # Current
 
