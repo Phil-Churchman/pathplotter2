@@ -1660,7 +1660,7 @@ def export_node_analysis(request, type):
             headers={"Content-Disposition": 'attachment; filename="node_analysis.csv"'},
         )    
         writer = csv.writer(response)
-        writer.writerow(["Enabled node", "From links count", "To links count", "Required nodes count", "Dependent nodes count"])
+        writer.writerow(["Node", "To links count", "From links count", "Dependent nodes count", "Required nodes count", "Required nodes:"])
 
     dependent_nodes = {i: [] for i in enabled_nodes}
 
@@ -1717,7 +1717,7 @@ def export_node_analysis(request, type):
                 if j.from_node == i:
                     to_links_count +=1
 
-            writer.writerow([i.category.category_code + i.node_code + ": " + i.node_text, from_links_count, to_links_count, len(required_nodes[i]), len(dependent_nodes[i])])
+            writer.writerow([i.category.category_code + i.node_code + ": " + i.node_text, to_links_count, from_links_count, len(dependent_nodes[i]), len(required_nodes[i])]+sorted([j.category.category_code + j.node_code + ": " + j.node_text for j in required_nodes[i]]))
 
     else:
         data = {}
