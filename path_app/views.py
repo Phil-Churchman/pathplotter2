@@ -1707,7 +1707,7 @@ def export_standard_links(request):
 
     for i in standard_links:
 
-        writer.writerow([i.from_node.code + ": " + i.from_node.name, i.to_node.code + ": " + i.to_node.name])
+        writer.writerow([i.from_node_standard.code + ": " + i.from_node_standard.name, i.to_node_standard.code + ": " + i.to_node_standard.name])
 
     return response
 
