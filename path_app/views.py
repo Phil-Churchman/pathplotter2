@@ -1643,33 +1643,89 @@ def export_links(request):
     return response
 
 @login_required
-def export_link_analysis(request):
+def export_node_analysis(request, type):
     [version, state, currentversion] = current_version(request)
     enabled_nodes = list(Node.objects.filter(version=version, enabled=True))
     for i in list(enabled_nodes):
         if i.category.enabled == False:
             enabled_nodes.remove(i)
     
+    enabled_goals = filter(lambda x: x.category.category_code == ">", enabled_nodes)
+
     enabled_links = list(Link.objects.filter(version=version, enabled=True))
 
-    response = HttpResponse(
-        content_type="text/csv",
-        headers={"Content-Disposition": 'attachment; filename="link_analysis.csv"'},
-    )    
-    writer = csv.writer(response)
-    writer.writerow(["Enabled node", "From links count", "To links count"])
+    if type == "csv":
+        response = HttpResponse(
+            content_type="text/csv",
+            headers={"Content-Disposition": 'attachment; filename="node_analysis.csv"'},
+        )    
+        writer = csv.writer(response)
+        writer.writerow(["Enabled node", "From links count", "To links count", "Required nodes count", "Dependent nodes count"])
+
+    dependent_nodes = {i: [] for i in enabled_nodes}
 
     for i in enabled_nodes:
-        from_links_count = 0
-        to_links_count = 0
-        
-        for j in enabled_links:
-            if j.to_node == i:
-                from_links_count +=1
-            if j.from_node == i:
-                to_links_count +=1
+        node_dict = {}
+        for j in list(filter(lambda x: x.from_node == i, enabled_links)):
+            node_dict[j.to_node] = False
+        if len(node_dict.keys()) == 0: continue
+        while True:
+            found1 = False
+            for j in list(node_dict.keys()):
+                if node_dict[j]: continue
+                found2 = False
+                for k in list(filter(lambda x: x.from_node == j, enabled_links)):
+                    if k.to_node not in node_dict.keys():
+                        node_dict[k.to_node] = False
+                        found1 = True
+                        found2 = True
+                if found2 == False:
+                    node_dict[j] == True
+            if found1 == False: break
+        dependent_nodes[i] = list(node_dict.keys())
 
-        writer.writerow([i.category.category_code + i.node_code + ": " + i.node_text, from_links_count, to_links_count])
+    required_nodes = {i: [] for i in enabled_nodes}
+
+    for i in enabled_nodes:
+        node_dict = {}
+        for j in list(filter(lambda x: x.to_node == i, enabled_links)):
+            node_dict[j.from_node] = False
+        if len(node_dict.keys()) == 0: continue
+        while True:
+            found1 = False
+            for j in list(node_dict.keys()):
+                if node_dict[j]: continue
+                found2 = False
+                for k in list(filter(lambda x: x.to_node == j, enabled_links)):
+                    if k.from_node not in node_dict.keys():
+                        node_dict[k.from_node] = False
+                        found1 = True
+                        found2 = True
+                if found2 == False:
+                    node_dict[j] == True
+            if found1 == False: break
+        required_nodes[i] = list(node_dict.keys())
+
+    if type == "csv":
+        for i in enabled_nodes:
+            from_links_count = 0
+            to_links_count = 0
+            
+            for j in enabled_links:
+                if j.to_node == i:
+                    from_links_count +=1
+                if j.from_node == i:
+                    to_links_count +=1
+
+            writer.writerow([i.category.category_code + i.node_code + ": " + i.node_text, from_links_count, to_links_count, len(required_nodes[i]), len(dependent_nodes[i])])
+
+    else:
+        data = {}
+        for i in enabled_nodes:
+            data[i.category.category_code + i.node_code + ": " + i.node_text] = {"Dependent nodes": sorted([j.category.category_code + j.node_code + ": " + j.node_text for j in dependent_nodes[i]]), "Required nodes": sorted([j.category.category_code + j.node_code + ": " + j.node_text for j in required_nodes[i]])}
+        dataset = json.dumps(data, indent=4)
+        response = HttpResponse(dataset, content_type='application/json')
+        response['Content-Disposition'] = 'attachment; filename=node_analysis.json'
 
     return response
 
