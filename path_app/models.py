@@ -55,6 +55,7 @@ class LinkStandard(models.Model):
         
     from_node_standard = models.ForeignKey(NodeStandard, on_delete=models.CASCADE, related_name='from_node', default=None)
     to_node_standard = models.ForeignKey(NodeStandard, on_delete=models.CASCADE, related_name='to_node', default=None)
+    remove = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.from_node_standard.code}: {self.from_node_standard.name} to {self.to_node_standard.code}: {self.to_node_standard.name}"

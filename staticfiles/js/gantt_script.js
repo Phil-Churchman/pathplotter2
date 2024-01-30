@@ -1,5 +1,5 @@
-function getGantt(gantt_data) {
-
+function getGantt(gantt_data, dep_dict) {
+  var dep_dict = JSON.parse(dep_dict)
   var [earliest_sequence, latest_sequence, earliest_sequence_dur, latest_sequence_dur, nodes_rev_dict, durations, params, colour_lookup, links_out_order, colour_ref, group_info_dict] = JSON.parse(gantt_data)
   if (Object.keys(edited_gantt_params).length != 0) {
     var params = edited_gantt_params
@@ -107,8 +107,9 @@ function getGantt(gantt_data) {
     );
     var gantt_items = items.map(
       (e) => { return e[0] });
+    console.log(gantt_items)
   }
-  else {
+  else if (params["Order_by"] == "Category") {
     var dict_temp = {}
     for (let i = 0; i < Object.keys(sequence).length; i++) {
       if (Object.keys(sequence)[i].slice(0, 1) == "G") {
@@ -124,6 +125,15 @@ function getGantt(gantt_data) {
     for (i = 0; i < items.length; i++) {
       gantt_items.push(dict_temp[items[i]])
     }
+  }
+
+  else {
+    console.log(sequence)
+    console.log(dep_dict)
+    var gantt_items = Object.keys(sequence)
+    gantt_items.sort(
+      (first, second) => { return dep_dict[second]-dep_dict[first] });
+      console.log(gantt_items)
   }
 
   var bar_padding = params["Bar_padding"]

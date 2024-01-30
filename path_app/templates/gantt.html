@@ -55,8 +55,8 @@
             Durations
           </a>
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" onclick="changeParam('gantt', 'Durations', 'Without durations'); getGantt('{{gantt_data}}')">No durations</a></li>
-            <li><a class="dropdown-item" onclick="changeParam('gantt', 'Durations', 'With durations'); getGantt('{{gantt_data}}')">Durations</a></li>
+            <li><a class="dropdown-item" onclick="changeParam('gantt', 'Durations', 'Without durations'); getGantt('{{gantt_data}}', '{{dep_dict}}')">No durations</a></li>
+            <li><a class="dropdown-item" onclick="changeParam('gantt', 'Durations', 'With durations'); getGantt('{{gantt_data}}', '{{dep_dict}}')">Durations</a></li>
           </ul>
         </li>
         <li class="nav-item dropdown">
@@ -64,8 +64,8 @@
             Timing
           </a>
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" onclick="changeParam('gantt', 'Timing', 'Earliest'); getGantt('{{gantt_data}}')">Earliest</a></li>
-            <li><a class="dropdown-item" onclick="changeParam('gantt', 'Timing', 'Latest'); getGantt('{{gantt_data}}')">Latest</a></li>
+            <li><a class="dropdown-item" onclick="changeParam('gantt', 'Timing', 'Earliest'); getGantt('{{gantt_data}}', '{{dep_dict}}')">Earliest</a></li>
+            <li><a class="dropdown-item" onclick="changeParam('gantt', 'Timing', 'Latest'); getGantt('{{gantt_data}}', '{{dep_dict}}')">Latest</a></li>
           </ul>
         </li>
         <li class="nav-item dropdown">
@@ -73,8 +73,9 @@
             Order
           </a>
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" onclick="changeParam('gantt', 'Order_by', 'Category'); getGantt('{{gantt_data}}')">Category</a></li>
-            <li><a class="dropdown-item" onclick="changeParam('gantt', 'Order_by', 'Time'); getGantt('{{gantt_data}}')">Time</a></li>
+            <li><a class="dropdown-item" onclick="changeParam('gantt', 'Order_by', 'Category'); getGantt('{{gantt_data}}', '{{dep_dict}}')">Category</a></li>
+            <li><a class="dropdown-item" onclick="changeParam('gantt', 'Order_by', 'Time'); getGantt('{{gantt_data}}', '{{dep_dict}}')">Time</a></li>
+            <li><a class="dropdown-item" onclick="changeParam('gantt', 'Order_by', 'Dependent nodes'); getGantt('{{gantt_data}}', '{{dep_dict}}')">Dependent nodes</a></li>
           </ul>
         </li>        
         
@@ -83,8 +84,8 @@
             Out sequence
           </a>
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" onclick="changeParam('gantt', 'Show_out_seq', true); getGantt('{{gantt_data}}')">Show</a></li>
-            <li><a class="dropdown-item" onclick="changeParam('gantt', 'Show_out_seq', false); getGantt('{{gantt_data}}')">Hide</a></li>
+            <li><a class="dropdown-item" onclick="changeParam('gantt', 'Show_out_seq', true); getGantt('{{gantt_data}}', '{{dep_dict}}')">Show</a></li>
+            <li><a class="dropdown-item" onclick="changeParam('gantt', 'Show_out_seq', false); getGantt('{{gantt_data}}', '{{dep_dict}}')">Hide</a></li>
           </ul>
         </li>
         <!-- <li class="nav-item">
@@ -128,7 +129,7 @@
   <h6 class="mt-2">{{ gantt_num|add:1 }} of {{ gantt_tot}}</h6>
 
   {% endif %} 
-  <svg id="gantt" width="1000" height="1000" onload="getGantt('{{gantt_data}}'), makeSelectable(evt, '{{node_id_dict}}', '{{group_id_dict}}')">
+  <svg id="gantt" width="1000" height="1000" onload="getGantt('{{gantt_data}}', '{{dep_dict}}'), makeSelectable(evt, '{{node_id_dict}}', '{{group_id_dict}}')">
     <defs>
       <marker id="arrowheadindianred" markerWidth="10" markerHeight="8" refX="10" refY="4" orient="auto" fill="indianred">
         <polygon points="0 0, 10 4, 0 8" />

@@ -91,6 +91,7 @@ urlpatterns = [
     path("network_modal/", views.network, {'modal': True}, name="network_modal"),
 
     path("gantt/<int:gantt_num>/", views.gantt, {'next': False, 'modal': False}, name="gantt"),
+
     path("gantt_modal/<int:gantt_num>/", views.gantt, {'next': False, 'modal': True}, name="gantt_modal"),
 
     path("new_pos/", views.new_pos, name="new_pos"),
@@ -125,7 +126,7 @@ urlpatterns = [
 
     path("standardise_nodes/", views.standardise_nodes, name="standardise_nodes"),
 
-    path("export_node_analysis/<str:type>/", views.export_node_analysis, name="export_node_analysis"),
+    path("export_node_analysis/<str:type>/<int:enabled>/", views.export_node_analysis, name="export_node_analysis"),
 
     path("export_standard_nodes/", views.export_standard_nodes, name="export_standard_nodes"),
 

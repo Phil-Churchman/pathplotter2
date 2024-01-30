@@ -36,10 +36,12 @@
 <table class="table table-borderless align-middle w-auto">
 
   <th></th>
-  <th></th>
+
   {% if superuser %}
   <th></th>
+  <th></th>
   {% endif %}
+  <th></th>
   <th></th>
 
   <th scope="col" colspan=2 style="width: 400px">From node</th>
@@ -55,13 +57,15 @@
 
   <tr>
     <td></td>
+    {% if superuser %}
+<td></td>
+<td></td>
+{% endif %}
     <td class="text-center">
 </td>
 
 
-{% if superuser %}
-<td></td>
-{% endif %}
+
 <td></td>
 <td colspan=2>
   <select class="form-select" aria-label="From category filter" name="from_category" id="from_category" form="category_selection" onchange="this.form.submit()" >
@@ -104,7 +108,20 @@
       <input type="image" src="/static/icons/trash3.svg" value='{"id": {{x.id}}, "ob_type": "link", "backup": true}' onclick="delAJAX(this.value)" style="width:20px;height:auto;"/>
     </form>
     </td>
-  <td style="padding-right:0px; padding-left:10px">
+    {% if superuser %}
+  <td >
+  <form id="standard{{x.id}}" onsubmit="return false;">
+    <input type="image" src="/static/icons/bookmark-check.svg" value='{"id": {{x.id}}, "remove": false}' onclick="standardAJAX(this.value)" style="width:20px;height:auto;"/>
+  </form>
+</td>
+<td >
+  <form id="standard{{x.id}}" onsubmit="return false;">
+    <input type="image" src="/static/icons/bookmark-x-fill.svg" value='{"id": {{x.id}}, "remove": true}' onclick="standardAJAX(this.value)" style="width:20px;height:auto;"/>
+  </form>
+</td>
+  {% endif %}  
+  
+    <td style="padding-right:0px; padding-left:10px">
 
     <!-- <form action="/switch/link/{{x.id}}"> -->
     <form method="post" id="switch"> 
@@ -125,13 +142,7 @@
   
   </td>
   
-  {% if superuser %}
-  <td >
-  <form id="standard{{x.id}}" onsubmit="return false;">
-    <input type="image" src="/static/icons/share.svg" value='{"id": {{x.id}}}' onclick="standardAJAX(this.value)" style="width:20px;height:auto;"/>
-  </form>
-</td>
-  {% endif %}  
+
   <td><form action="/edit-link/{{x.id}}" onsubmit="showPleaseWait()">
 
     <input type="image" name="submit" src="/static/icons/pencil.svg" alt="Submit" style="width:20px;height:auto;"/>

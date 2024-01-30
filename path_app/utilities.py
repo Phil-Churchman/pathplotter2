@@ -9,6 +9,8 @@ from .loops import get_loops
 import django.apps
 import pandas as pd
 import os
+from django.http import HttpResponse, HttpResponseRedirect
+import csv, json
 
 network_lookup = {
 "Model choice": "Model_choice",
@@ -208,7 +210,7 @@ ref_models = {
     Label_option: ["Full labels", "Short labels", "No labels"],
     Auto_layout_option: ["Network", "Columns"],
     Start_year_option: ["2023", "2024", "2025", "2026", "2027", "2028", "2029", "2030"],
-    Order_by_option: ["Time", "Category"],
+    Order_by_option: ["Time", "Category", "Dependent nodes"],
     X_axis_option: ["Month", "Year", "Number"],
     Timing_option: ["Earliest", "Latest"],
     Duration_option: ["With durations", "Without durations"],
@@ -940,6 +942,109 @@ def auto_layout_columns(request):
     move_links(request, data)
 
 @login_required
+def auto_layout_gantt(request):
+    [version, state, currentversion] = current_version(request)
+    network_enabled = NetworkParam.objects.get(version=version).Enabled_select.option
+    gantt_params = GanttParam.objects.get(version=version)
+
+    if network_enabled == "Disabled only":
+        return
+    elif network_enabled == "Enabled only":
+        setattr(gantt_params, "Enabled_only", True)
+        gantt_params.save()
+    else:
+        setattr(gantt_params, "Enabled_only", False)
+        gantt_params.save()
+
+    context = gantt_context(request, 0, **{'next': False, 'modal': False})
+
+    [earliest_sequence, latest_sequence, earliest_sequence_dur, latest_sequence_dur, nodes_rev_dict, durations, params, colour_lookup, links_out_order, colour_ref, group_info_dict] = json.loads(context["gantt_data"])
+    node_id_dict = json.loads(context["node_id_dict"])
+    group_id_dict = json.loads(context["group_id_dict"])
+    dep_dict = json.loads(context["dep_dict"])
+    durations = params["Durations"]
+    timing = params["Timing"]
+    if timing == "Earliest":
+        if durations == "Without durations":
+            sequence = earliest_sequence
+        else:
+            sequence = earliest_sequence_dur
+    else:
+        if durations == "Without durations":
+            sequence = latest_sequence
+        else:
+            sequence = latest_sequence_dur        
+
+    combined = {i: (sequence[i], dep_dict[i]) for i in sequence.keys()}
+    seq_max = max(sequence.values())
+    plot_dict = {}
+    group_list = list(group_id_dict.keys())
+    node_list = list(node_id_dict.keys())
+    for i in combined.keys():
+        if i in group_list:
+            group = Grouped.objects.get(id=group_id_dict[i])
+            group_nodes = []
+            for loop in group.loops.all():
+                for link in loop.links.all():
+                    group_nodes.append(link.from_node)
+            for node in list(set(group_nodes)):
+                plot_dict[node] = combined[i]
+        elif i in node_list:
+            plot_dict[Node.objects.get(id=node_id_dict[i])] = combined[i]
+
+    params = NetworkParam.objects.get(version=version)
+
+    x_min = getattr(params,"Target_boundary_distance")
+    x_max = getattr(params,"Plot_width") - getattr(params,"Target_boundary_distance") - getattr(params,"Legend_x_spacing") - getattr(params,"Legend_box_pad")
+    y_min = getattr(params,"Target_boundary_distance")
+    y_max = getattr(params,"Plot_height") - getattr(params,"Target_boundary_distance")               
+
+    if seq_max + 1 > 1:
+        x_spacing = (x_max - x_min) / (seq_max)
+    else:
+        x_spacing = 0
+
+    step_counter = 0
+    for i in range(seq_max + 1):
+        nodes = list(filter(lambda x: plot_dict[x][0] == i, plot_dict.keys()))
+        nodes = sorted(nodes, key = lambda x: (-plot_dict[x][1], (x.category.category_code + x.node_code)))
+        node_count = len(nodes)
+        if node_count > 1:
+            y_spacing = (y_max - y_min) / (node_count - 1)
+        else:
+            y_spacing = 0
+        node_counter = 0
+        for j in nodes:
+            # if cat_count > 1:
+            
+            setattr(j, "xpos", x_min + x_spacing * step_counter)
+            
+            if y_spacing != 0:
+                 setattr(j, "ypos", y_min + y_spacing * node_counter)
+            else:
+                setattr(j, "ypos", (y_min + y_max) / 2)
+            setattr(j, "placed", True)
+            j.save()
+            node_counter +=1
+        step_counter +=1
+
+    for i in Link.objects.filter(version=version):
+        from_node = getattr(i, "from_node")
+        to_node = getattr(i, "to_node")
+        x_from = getattr(from_node, "xpos")
+        y_from = getattr(from_node, "ypos")
+        x_to = getattr(to_node, "xpos")
+        y_to = getattr(to_node, "ypos")
+        setattr(i, "xmid", (x_from + x_to)/2)
+        setattr(i, "ymid", (y_from + y_to)/2)
+        i.save()
+
+    data = get_data(request)
+    move_links(request, data)
+
+
+
+@login_required
 def auto_layout_links(request):
 
     data = get_data(request)
@@ -950,6 +1055,14 @@ def auto_layout_links(request):
 @login_required
 def move_links(request, data):
     [version, state, currentversion] = current_version(request)
+
+    params = NetworkParam.objects.get(version=version)
+
+    x_min = 0
+    x_max = getattr(params,"Plot_width") - getattr(params,"Legend_x_spacing") - getattr(params,"Legend_box_pad")
+    y_min = 0
+    y_max = getattr(params,"Plot_height")   
+
 
     for i in data["links"].keys():
         data["links"][i]["xmid"], data["links"][i]["ymid"] = start_mid(data, data["links"][i]["from_node"], data["links"][i]["to_node"])
@@ -1008,8 +1121,8 @@ def move_links(request, data):
             data["links"][link_id_2]["xmid"] = data["links"][link_id_2]["xmid"] + math.cos(vector_angle - math.pi/2) * pair_separation / 2
             data["links"][link_id_2]["ymid"] = data["links"][link_id_2]["ymid"] + math.sin(vector_angle - math.pi/2) * pair_separation / 2                
     for i in Link.objects.filter(version=version):
-        i.xmid = data["links"][i.id]["xmid"]
-        i.ymid = data["links"][i.id]["ymid"]
+        i.xmid = min(max(data["links"][i.id]["xmid"], x_min + 2), x_max - 2)
+        i.ymid = min(max(data["links"][i.id]["ymid"], y_min + 2), y_max - 2)
         i.save()
 
 def start_mid(data, from_node, to_node):
@@ -1166,6 +1279,131 @@ def add_backup(request, action):
     return
 
 # Gantt
+
+def gantt_context(request, gantt_num, **kwargs):
+
+    [version, state, currentversion] = current_version(request)
+
+    params = GanttParam.objects.get(version=version)
+
+    if params.Enabled_only:
+        goal_connections(request, True)
+    else:
+        goal_connections(request, False)
+
+    # Prevent navigation to gantt > 0 if not from gantt view
+
+    if gantt_num != 0 and state[:7] != "/gantt/":
+        # return HttpResponseRedirect("/gantt/0/")
+        return False
+    
+
+    enabled_only = GanttParam.objects.get(version=version).Enabled_only
+
+    links, nodes, node_dict, node_dict_lookup = get_links_nodes(request, enabled_only)
+
+    # Check if conditions for producing Gantt true
+
+    goals = list(filter(lambda x: x.category.category_code == ">" , nodes))
+
+    # goals = nodes.objects.filter(category__in=Category.objects.filter(category_code=">"))
+    if len(goals) == 0 or len(nodes) == 0 or len(links) == 0 or len(goals) == len(nodes):
+        return False
+    link_to_goal = False
+    for i in links:
+        if i.from_node not in goals and i.to_node in goals:
+            link_to_goal = True
+            break
+    
+    if link_to_goal == False:
+        return False
+    
+    # Set state
+
+    # state = "/gantt/" + str(gantt_num) + "/"
+    state = "/gantt/" + str(0) + "/"
+    setattr(currentversion, "state", state)
+    currentversion.save()
+
+    
+    network_params = NetworkParam.objects.get(version=version)
+    # gantt_params = GanttParam.objects.get(version=version)
+    
+    modal = kwargs["modal"]
+    if network_params.Model_choice == "AC":
+        if updateloops(request)==False:
+            network_params.Model_choice = "EF"
+            network_params.save()
+            try:
+                gantt_data, params, node_id_dict, group_id_dict, gantt_num, gantt_tot = build_gantt_alternative(request)
+            except:
+                return False
+            modal = True
+        else:
+            try:
+                gantt_data, params, node_id_dict, group_id_dict, gantt_num, gantt_tot = build_gantt(request, gantt_num)
+            except:
+                try:
+                    gantt_data, params, node_id_dict, group_id_dict, gantt_num, gantt_tot = build_gantt(request, 0)
+                except:
+                    return False
+    else:
+        try:
+            gantt_data, params, node_id_dict, group_id_dict, gantt_num, gantt_tot = build_gantt_alternative(request)
+        except:
+            return False
+
+    if params["Enabled_only"]:
+        enabled_text = "Enabled only"
+    else:
+        enabled_text = "All"
+
+    if params["Apply_groups"]:
+        groups_text = "Groups"
+    else:
+        groups_text = "No groups"    
+
+    if params["Durations"] == "With durations":
+        duration_text = "Durations"
+    else:
+        duration_text = "No durations"
+
+    if network_params.Model_choice == "AC":
+        model_text = "Accurate"
+    else:
+        model_text = "Efficient"
+    
+    dep_nodes = get_node_analysis(request, "data", params["Enabled_only"])
+    dep_dict = {}
+    for i in node_id_dict.keys():
+        node = Node.objects.get(id=node_id_dict[i])
+        dep_dict[i] = len(dep_nodes[node])
+    for i in group_id_dict.keys():
+        group = Grouped.objects.get(id=group_id_dict[i])
+        loops = group.loops.all()
+        nodes = []
+        for j in loops:
+            links = j.links.all()
+            for k in links:
+                nodes.append(k.from_node)
+        nodes = list(set(nodes))
+        dep_dict[i] = len(nodes)
+    context = {
+        "gantt_data": json.dumps(gantt_data).replace("'", ""),
+        "node_id_dict": json.dumps(node_id_dict),
+        "group_id_dict": json.dumps(group_id_dict),
+        "enabled": enabled_text,
+        "modal": modal,
+        "model": model_text,
+        "accurate": network_params.Model_choice == "AC",
+        "gantt_num": gantt_num,
+        "gantt_tot": gantt_tot,
+        "groups": groups_text,
+        "durations": duration_text,
+        'version': version.name,
+        'dep_dict': json.dumps(dep_dict),
+    }
+    return context
 
 @login_required
 def disable_redundant_links(request):
@@ -1680,68 +1918,6 @@ def build_gantt_alternative(request):
     for i in nodes:
         durations[i] = i.duration
 
-    ## Alternative sequence generation without moving dependants
-
-    # latest_sequence = {i: 0 for i in active_nodes}
-
-    # while True:
-    #     found=False
-    #     for i in active_links:
-    #         if latest_sequence[i.from_node] >= latest_sequence[i.to_node]:
-    #             latest_sequence[i.from_node] = latest_sequence[i.to_node] - 1
-    #             found = True
-    #     if found == False:
-    #         break
-    # min_sequ = min(latest_sequence.values())
-    # for i in latest_sequence.keys():
-    #     latest_sequence[i] -= min_sequ
-
-    # earliest_sequence = {i: 0 for i in active_nodes}
-    # while True:
-    #     found=False
-    #     for i in active_links:
-    #         if earliest_sequence[i.from_node] >= earliest_sequence[i.to_node]:
-    #             earliest_sequence[i.to_node] = earliest_sequence[i.from_node] + 1
-    #             found = True
-    #     if found == False:
-    #         break
-    
-    # earliest_sequence_dur = {i: 0 for i in active_nodes}
-    # latest_sequence_dur = {i: 0 for i in active_nodes}
-
-    # while True:
-    #     found=False
-    #     for i in active_links:
-    #         if earliest_sequence_dur[i.from_node] + durations[i.from_node]> earliest_sequence_dur[i.to_node]:
-    #             earliest_sequence_dur[i.to_node] = earliest_sequence_dur[i.from_node] + durations[i.from_node]
-    #             found = True
-    #     if found == False:
-    #         break
-    # while True:
-    #     found=False
-    #     for i in active_links:
-    #         if latest_sequence_dur[i.from_node] + durations[i.from_node]> latest_sequence_dur[i.to_node]:
-    #             latest_sequence_dur[i.from_node] = latest_sequence_dur[i.to_node] - durations[i.from_node]
-    #             found = True
-    #     if found == False:
-    #         break
-    
-    # min_sequ = min(latest_sequence_dur.values())
-    # for i in latest_sequence_dur.keys():
-    #     latest_sequence_dur[i] -= min_sequ 
-
-    # node_dict = {}
-    # counter = 0
-    # for i in nodes:
-    #     node_dict[i] = "N" + str(counter)
-    #     counter +=1
-
-    # latest_sequence = {node_dict[i]: latest_sequence[i] for i in latest_sequence.keys()}
-    # earliest_sequence = {node_dict[i]: earliest_sequence[i] for i in earliest_sequence.keys()}
-    # latest_sequence_dur = {node_dict[i]: latest_sequence_dur[i] for i in latest_sequence_dur.keys()}
-    # earliest_sequence_dur = {node_dict[i]: earliest_sequence_dur[i] for i in earliest_sequence_dur.keys()}
-
-
     # Create other required data for sending to client
 
     node_id_dict = {node_dict[i]: i.id for i in node_dict.keys()}
@@ -1760,6 +1936,7 @@ def build_gantt_alternative(request):
     colour_dict = create_colour_dict(request)
 
     out_order = list(filter(lambda x: x not in active_links, links))
+
     for i in list(out_order):
         if i.from_node not in active_nodes.keys() or i.to_node not in active_nodes.keys():
             out_order.remove(i)
@@ -1768,7 +1945,7 @@ def build_gantt_alternative(request):
 
     durations = {node_dict[i]: durations[i] for i in durations.keys()}
 
-    gantt_data = [earliest_sequence, latest_sequence, earliest_sequence_dur, latest_sequence_dur, nodes_rev_dict, durations, params, colour_lookup, links_out_order, colour_ref]
+    gantt_data = [earliest_sequence, latest_sequence, earliest_sequence_dur, latest_sequence_dur, nodes_rev_dict, durations, params, colour_lookup, links_out_order, colour_ref, None]
     
     group_id_dict = {}
     
@@ -2204,3 +2381,112 @@ def import_link_csv(request, importfile, mincount):
             if Link.objects.filter(version=version, from_node=i[0], to_node=i[1]).count() == 0:
                 Link.objects.create(version=version, from_node=i[0], to_node=i[1], xmid=(i[0].xpos + i[1].xpos)/2, ymid=(i[0].ypos + i[1].ypos)/2, notes=("Added by: " + link_dict[i][1]))
 
+# analysis
+                
+@login_required
+def get_node_analysis(request, type, enabled):
+
+    if enabled == 1: enabled == True
+    else: enabled == False
+    [version, state, currentversion] = current_version(request)
+
+    if enabled:
+        nodes = list(Node.objects.filter(version=version, enabled=True))
+        for i in list(nodes):
+            if i.category.enabled == False:
+                nodes.remove(i)
+        
+        goals = filter(lambda x: x.category.category_code == ">", nodes)
+
+        links = list(Link.objects.filter(version=version, enabled=True))
+
+    else:
+        nodes = list(Node.objects.filter(version=version))
+        
+        goals = filter(lambda x: x.category.category_code == ">", nodes)
+
+        links = list(Link.objects.filter(version=version))        
+
+    if type == "csv":
+        response = HttpResponse(
+            content_type="text/csv",
+            headers={"Content-Disposition": 'attachment; filename="node_analysis.csv"'},
+        )    
+        writer = csv.writer(response)
+        writer.writerow(["Node", "To links count", "From links count", "Dependent nodes count", "Required nodes count", "Required nodes:"])
+
+    dependent_nodes = {i: [] for i in nodes}
+
+    for i in nodes:
+        node_dict = {}
+        for j in list(filter(lambda x: x.from_node == i, links)):
+            node_dict[j.to_node] = False
+        if len(node_dict.keys()) == 0: continue
+        while True:
+            found1 = False
+            for j in list(node_dict.keys()):
+                if node_dict[j]: continue
+                if j.to_node == i: continue
+                found2 = False
+                for k in list(filter(lambda x: x.from_node == j, links)):
+                    if k.to_node == i: continue
+                    if k.to_node not in node_dict.keys():
+                        node_dict[k.to_node] = False
+                        found1 = True
+                        found2 = True
+                if found2 == False:
+                    node_dict[j] == True
+            if found1 == False: break
+        dependent_nodes[i] = list(node_dict.keys())
+
+    required_nodes = {i: [] for i in nodes}
+
+    for i in nodes:
+        node_dict = {}
+        for j in list(filter(lambda x: x.to_node == i, links)):
+            node_dict[j.from_node] = False
+        if len(node_dict.keys()) == 0: continue
+        while True:
+            found1 = False
+            for j in list(node_dict.keys()):
+                if node_dict[j]: continue
+                
+                found2 = False
+                for k in list(filter(lambda x: x.to_node == j, links)):
+                    if k.from_node == i: continue
+                    if k.from_node not in node_dict.keys():
+                        node_dict[k.from_node] = False
+                        found1 = True
+                        found2 = True
+                if found2 == False:
+                    node_dict[j] == True
+            if found1 == False: break
+        required_nodes[i] = list(node_dict.keys())
+
+    if type == "csv":
+        for i in nodes:
+            from_links_count = 0
+            to_links_count = 0
+            
+            for j in links:
+                if j.to_node == i:
+                    from_links_count +=1
+                if j.from_node == i:
+                    to_links_count +=1
+
+            writer.writerow([i.category.category_code + i.node_code + ": " + i.node_text, to_links_count, from_links_count, len(dependent_nodes[i]), len(required_nodes[i])]+sorted([j.category.category_code + j.node_code + ": " + j.node_text for j in required_nodes[i]]))
+        return response
+
+    elif type == "json":
+        data = {}
+        for i in nodes:
+            data[i.category.category_code + i.node_code + ": " + i.node_text] = {"Dependent nodes": sorted([j.category.category_code + j.node_code + ": " + j.node_text for j in dependent_nodes[i]]), "Required nodes": sorted([j.category.category_code + j.node_code + ": " + j.node_text for j in required_nodes[i]])}
+        dataset = json.dumps(data, indent=4)
+        response = HttpResponse(dataset, content_type='application/json')
+        response['Content-Disposition'] = 'attachment; filename=node_analysis.json'
+
+        return response
+    
+    else:
+
+        return {i: dependent_nodes[i] for i in nodes}

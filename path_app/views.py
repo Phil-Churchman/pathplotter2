@@ -489,109 +489,11 @@ def network(request, **kwargs):
 
 @login_required
 def gantt(request, gantt_num, **kwargs):
+    template = loader.get_template('gantt.html')    
+    context = gantt_context(request, gantt_num, **kwargs)
 
-    [version, state, currentversion] = current_version(request)
+    if context == False: return HttpResponseRedirect("/versions_gantt_error/")
 
-    params = GanttParam.objects.get(version=version)
-
-    if params.Enabled_only:
-        goal_connections(request, True)
-    else:
-        goal_connections(request, False)
-
-    # Prevent navigation to gantt > 0 if not from gantt view
-
-    if gantt_num != 0 and state[:7] != "/gantt/":
-        return HttpResponseRedirect("/gantt/0/")
-
-    enabled_only = GanttParam.objects.get(version=version).Enabled_only
-
-    links, nodes, node_dict, node_dict_lookup = get_links_nodes(request, enabled_only)
-
-    # Check if conditions for producing Gantt true
-
-    goals = list(filter(lambda x: x.category.category_code == ">" , nodes))
-
-    # goals = nodes.objects.filter(category__in=Category.objects.filter(category_code=">"))
-    if len(goals) == 0 or len(nodes) == 0 or len(links) == 0 or len(goals) == len(nodes):
-        return HttpResponseRedirect("/versions_gantt_error/")
-    link_to_goal = False
-    for i in links:
-        if i.from_node not in goals and i.to_node in goals:
-            link_to_goal = True
-            break
-    
-    if link_to_goal == False:
-        return HttpResponseRedirect("/versions_gantt_error/")
-    
-    # Set state
-
-    # state = "/gantt/" + str(gantt_num) + "/"
-    state = "/gantt/" + str(0) + "/"
-    setattr(currentversion, "state", state)
-    currentversion.save()
-
-    template = loader.get_template('gantt.html')
-    network_params = NetworkParam.objects.get(version=version)
-    # gantt_params = GanttParam.objects.get(version=version)
-    
-    modal = kwargs["modal"]
-    if network_params.Model_choice == "AC":
-        if updateloops(request)==False:
-            network_params.Model_choice = "EF"
-            network_params.save()
-            try:
-                gantt_data, params, node_id_dict, group_id_dict, gantt_num, gantt_tot = build_gantt_alternative(request)
-            except:
-                return HttpResponseRedirect("/versions_gantt_error/")
-            modal = True
-        else:
-            try:
-                gantt_data, params, node_id_dict, group_id_dict, gantt_num, gantt_tot = build_gantt(request, gantt_num)
-            except:
-                try:
-                    gantt_data, params, node_id_dict, group_id_dict, gantt_num, gantt_tot = build_gantt(request, 0)
-                except:
-                    return HttpResponseRedirect("/versions_gantt_error/")
-    else:
-        try:
-            gantt_data, params, node_id_dict, group_id_dict, gantt_num, gantt_tot = build_gantt_alternative(request)
-        except:
-            return HttpResponseRedirect("/versions_gantt_error/")
-
-    if params["Enabled_only"]:
-        enabled_text = "Enabled only"
-    else:
-        enabled_text = "All"
-
-    if params["Apply_groups"]:
-        groups_text = "Groups"
-    else:
-        groups_text = "No groups"    
-
-    if params["Durations"] == "With durations":
-        duration_text = "Durations"
-    else:
-        duration_text = "No durations"
-
-    if network_params.Model_choice == "AC":
-        model_text = "Accurate"
-    else:
-        model_text = "Efficient"
-    context = {
-        "gantt_data": json.dumps(gantt_data).replace("'", ""),
-        "node_id_dict": json.dumps(node_id_dict),
-        "group_id_dict": json.dumps(group_id_dict),
-        "enabled": enabled_text,
-        "modal": modal,
-        "model": model_text,
-        "accurate": network_params.Model_choice == "AC",
-        "gantt_num": gantt_num,
-        "gantt_tot": gantt_tot,
-        "groups": groups_text,
-        "durations": duration_text,
-        'version': version.name
-    }
     return HttpResponse(template.render(context, request))
 
 #delete functions
@@ -1373,6 +1275,9 @@ def layout(request, type):
     elif type == "columns":
         auto_layout_columns(request)
         add_backup(request, "generic")
+    elif type == "gantt":
+        auto_layout_gantt(request)
+        add_backup(request, "generic")
     elif type == "links":
         auto_layout_links(request)
         add_backup(request, "generic")    
@@ -1643,16 +1548,31 @@ def export_links(request):
     return response
 
 @login_required
-def export_node_analysis(request, type):
-    [version, state, currentversion] = current_version(request)
-    enabled_nodes = list(Node.objects.filter(version=version, enabled=True))
-    for i in list(enabled_nodes):
-        if i.category.enabled == False:
-            enabled_nodes.remove(i)
-    
-    enabled_goals = filter(lambda x: x.category.category_code == ">", enabled_nodes)
+def export_node_analysis(request, type, enabled):
 
-    enabled_links = list(Link.objects.filter(version=version, enabled=True))
+
+    return get_node_analysis(request, type, enabled)
+
+    if enabled == 1: enabled == True
+    else: enabled == False
+    [version, state, currentversion] = current_version(request)
+
+    if enabled:
+        nodes = list(Node.objects.filter(version=version, enabled=True))
+        for i in list(nodes):
+            if i.category.enabled == False:
+                nodes.remove(i)
+        
+        goals = filter(lambda x: x.category.category_code == ">", nodes)
+
+        links = list(Link.objects.filter(version=version, enabled=True))
+
+    else:
+        nodes = list(Node.objects.filter(version=version))
+        
+        goals = filter(lambda x: x.category.category_code == ">", nodes)
+
+        links = list(Link.objects.filter(version=version))        
 
     if type == "csv":
         response = HttpResponse(
@@ -1662,19 +1582,21 @@ def export_node_analysis(request, type):
         writer = csv.writer(response)
         writer.writerow(["Node", "To links count", "From links count", "Dependent nodes count", "Required nodes count", "Required nodes:"])
 
-    dependent_nodes = {i: [] for i in enabled_nodes}
+    dependent_nodes = {i: [] for i in nodes}
 
-    for i in enabled_nodes:
+    for i in nodes:
         node_dict = {}
-        for j in list(filter(lambda x: x.from_node == i, enabled_links)):
+        for j in list(filter(lambda x: x.from_node == i, links)):
             node_dict[j.to_node] = False
         if len(node_dict.keys()) == 0: continue
         while True:
             found1 = False
             for j in list(node_dict.keys()):
                 if node_dict[j]: continue
+                if j.to_node == i: continue
                 found2 = False
-                for k in list(filter(lambda x: x.from_node == j, enabled_links)):
+                for k in list(filter(lambda x: x.from_node == j, links)):
+                    if k.to_node == i: continue
                     if k.to_node not in node_dict.keys():
                         node_dict[k.to_node] = False
                         found1 = True
@@ -1684,19 +1606,21 @@ def export_node_analysis(request, type):
             if found1 == False: break
         dependent_nodes[i] = list(node_dict.keys())
 
-    required_nodes = {i: [] for i in enabled_nodes}
+    required_nodes = {i: [] for i in nodes}
 
-    for i in enabled_nodes:
+    for i in nodes:
         node_dict = {}
-        for j in list(filter(lambda x: x.to_node == i, enabled_links)):
+        for j in list(filter(lambda x: x.to_node == i, links)):
             node_dict[j.from_node] = False
         if len(node_dict.keys()) == 0: continue
         while True:
             found1 = False
             for j in list(node_dict.keys()):
                 if node_dict[j]: continue
+                
                 found2 = False
-                for k in list(filter(lambda x: x.to_node == j, enabled_links)):
+                for k in list(filter(lambda x: x.to_node == j, links)):
+                    if k.from_node == i: continue
                     if k.from_node not in node_dict.keys():
                         node_dict[k.from_node] = False
                         found1 = True
@@ -1707,27 +1631,32 @@ def export_node_analysis(request, type):
         required_nodes[i] = list(node_dict.keys())
 
     if type == "csv":
-        for i in enabled_nodes:
+        for i in nodes:
             from_links_count = 0
             to_links_count = 0
             
-            for j in enabled_links:
+            for j in links:
                 if j.to_node == i:
                     from_links_count +=1
                 if j.from_node == i:
                     to_links_count +=1
 
             writer.writerow([i.category.category_code + i.node_code + ": " + i.node_text, to_links_count, from_links_count, len(dependent_nodes[i]), len(required_nodes[i])]+sorted([j.category.category_code + j.node_code + ": " + j.node_text for j in required_nodes[i]]))
+        return response
 
-    else:
+    elif type == "json":
         data = {}
-        for i in enabled_nodes:
+        for i in nodes:
             data[i.category.category_code + i.node_code + ": " + i.node_text] = {"Dependent nodes": sorted([j.category.category_code + j.node_code + ": " + j.node_text for j in dependent_nodes[i]]), "Required nodes": sorted([j.category.category_code + j.node_code + ": " + j.node_text for j in required_nodes[i]])}
         dataset = json.dumps(data, indent=4)
         response = HttpResponse(dataset, content_type='application/json')
         response['Content-Disposition'] = 'attachment; filename=node_analysis.json'
 
-    return response
+        return response
+    
+    else:
+
+        return {i: dependent_nodes[i] for i in nodes}
 
 @login_required
 def export_standard_nodes(request):
@@ -1759,11 +1688,11 @@ def export_standard_links(request):
         headers={"Content-Disposition": 'attachment; filename="standard_links.csv"'},
     )    
     writer = csv.writer(response)
-    writer.writerow(["From node", "To node"])
+    writer.writerow(["From node", "To node", "Remove"])
 
     for i in standard_links:
 
-        writer.writerow([i.from_node_standard.code + ": " + i.from_node_standard.name, i.to_node_standard.code + ": " + i.to_node_standard.name])
+        writer.writerow([i.from_node_standard.code + ": " + i.from_node_standard.name, i.to_node_standard.code + ": " + i.to_node_standard.name, i.remove])
 
     return response
 
@@ -2020,7 +1949,9 @@ def add_link_standard(request):
 
     if request.method == 'POST':
         post_data=json.loads(request.POST.get('post_data'))
+        print(post_data)
         id = post_data["id"]
+        remove = post_data["remove"]
         html = "links.html"
 
     try:
@@ -2028,8 +1959,6 @@ def add_link_standard(request):
             return render(request,html) 
     except:
         return render(request,html)     
-
-    [version, state, currentversion] = current_version(request)
 
     link = Link.objects.get(id=id)
 
@@ -2044,7 +1973,7 @@ def add_link_standard(request):
     if LinkStandard.objects.filter(from_node_standard = from_node_standard, to_node_standard = to_node_standard).count() != 0:
         return render(request,html) 
     else:
-        LinkStandard.objects.create(from_node_standard = from_node_standard, to_node_standard = to_node_standard)
+        LinkStandard.objects.create(from_node_standard = from_node_standard, to_node_standard = to_node_standard, remove=remove)
         
     return render(request,html) 
 
@@ -2054,27 +1983,45 @@ def apply_link_standards(request):
 
     category_code_list = [i.category_code for i in list(Category.objects.filter(version=version))]
 
-    link_standards = list(LinkStandard.objects.all())
+    link_standards = list(LinkStandard.objects.filter(remove=False))
     for i in list(link_standards):
-        if i.from_node.code not in category_code_list or i.to_node.code not in category_code_list:
+        if i.from_node_standard.code not in category_code_list or i.to_node_standard.code not in category_code_list:
             link_standards.remove(i)
 
-
     for i in link_standards:
-        if Node.objects.filter(version=version, category=Category.objects.get(version=version, category_code=i.from_node.code), node_text=i.from_node.name).count() == 0:
+        if Node.objects.filter(version=version, category=Category.objects.get(version=version, category_code=i.from_node_standard.code), node_text=i.from_node_standard.name).count() == 0:
             continue
         else:
-            from_node = Node.objects.get(category=Category.objects.get(version=version, category_code=i.from_node.code), node_text=i.from_node.name)
-        if Node.objects.filter(version=version, category=Category.objects.get(version=version, category_code=i.to_node.code), node_text=i.to_node.name).count() == 0:
+            from_node = Node.objects.get(category=Category.objects.get(version=version, category_code=i.from_node_standard.code), node_text=i.from_node_standard.name)
+        if Node.objects.filter(version=version, category=Category.objects.get(version=version, category_code=i.to_node_standard.code), node_text=i.to_node_standard.name).count() == 0:
             continue
         else:
-            to_node = Node.objects.get(category=Category.objects.get(version=version, category_code=i.to_node.code), node_text=i.to_node.name)
+            to_node = Node.objects.get(category=Category.objects.get(version=version, category_code=i.to_node_standard.code), node_text=i.to_node_standard.name)
         if Link.objects.filter(version=version, from_node = from_node, to_node = to_node).count() != 0:
             continue
         else:
             
             Link.objects.create(version=version, from_node = from_node, to_node = to_node, notes="Standard link added", xmid=(from_node.xpos + to_node.xpos)/2, ymid=(from_node.ypos + to_node.ypos)/2)
 
+    link_disable = list(LinkStandard.objects.filter(remove=True))
+
+    for i in link_disable:
+        if Node.objects.filter(version=version, category=Category.objects.get(version=version, category_code=i.from_node_standard.code), node_text=i.from_node_standard.name).count() == 0:
+            continue
+        else:
+            from_node = Node.objects.get(category=Category.objects.get(version=version, category_code=i.from_node_standard.code), node_text=i.from_node_standard.name)
+        if Node.objects.filter(version=version, category=Category.objects.get(version=version, category_code=i.to_node_standard.code), node_text=i.to_node_standard.name).count() == 0:
+            continue
+        else:
+            to_node = Node.objects.get(category=Category.objects.get(version=version, category_code=i.to_node_standard.code), node_text=i.to_node_standard.name)
+        if Link.objects.filter(version=version, from_node = from_node, to_node = to_node, enabled=True).count() != 0:
+            link = Link.objects.get(version=version, from_node = from_node, to_node = to_node)
+            setattr(link, "enabled", False)
+            if link.notes == None:
+                link.notes = "Disabled as standard link set to remove"
+            else:
+                link.notes = "Disabled as standard link set to remove - " + link.notes
+            link.save()
 
     add_backup(request, "generic")
     return HttpResponseRedirect("/links/")
