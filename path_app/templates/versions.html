@@ -7,7 +7,7 @@
 <div>
   <nav class="navbar navbar-expand-lg bg-light" id="network_nav">
     <div class="container-fluid">
-      <a class="navbar-brand" href="#">Versions</a>
+      <a class="navbar-brand" id="sub_brand" href="#">Versions</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -52,9 +52,24 @@
 {% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container mt-3">
+  <label for="version_selection" class="form-label">Active version</label>
+  <form action="/versions/" method="post" id="version_selection">
+    {%csrf_token%}
+  </form>
+  <select class="form-select" aria-label="Current version" name="select_version" id="select_version" form="version_selection" onchange="this.form.submit(), showPleaseWait()" >
+
+    <!-- <option value="None">None selected</option> -->
+    {% for x in versions %}
+    {% if x.current %}
+    <option value="{{ x.id }}" selected>{{ x.name }}</option>
+    {% else %}
+    <option value="{{ x.id }}">{{ x.name }}</option>
+    {% endif %}
+    {% endfor %}
+  </select>
  
-<table class="table table-borderless align-middle w-auto">
+<table class="table table-borderless align-middle w-auto mt-3">
 
 
   <th scope="col"></th>
@@ -65,26 +80,31 @@
 
 {% for x in versions %}
 {% if x.current %}
-  <tr id="version{{x.id}}" class="table-active">
+  <tr id="row{{x.id}}" class="table-active">
   {% else %}
-  <tr id="version{{x.id}}" class="">  
+  <tr id="row{{x.id}}" class="">  
   {% endif %}
 
-  <td><form action="/archive-version/{{x.id}}" onsubmit="showPleaseWait()">
-    <!-- <button type="submit" class="btn btn-secondary btn-sm">Archive</button> -->
+  <td>
+    <form id="archive{{x.id}}" onsubmit="return false;">
+        <input type="image" src="/static/icons/archive.svg" value='{"id": {{x.id}}}' onclick="archiveAJAX(this.value)" style="width:20px;height:auto;"/>
+    </form>
+    
+    
+    <!-- <form action="/archive-version/{{x.id}}" onsubmit="showPleaseWait()">
     <input type="image" name="submit" src="/static/icons/archive.svg" alt="Submit" style="width:20px;height:auto;" />
-  </form></td>
+  </form> -->
+
+</td>
   <td><form action="/copy-version/{{x.id}}" onsubmit="showPleaseWait()">
-    <!-- <button type="submit" class="btn btn-secondary btn-sm">Delete</button> -->
     <input type="image" name="submit" src="/static/icons/copy.svg" alt="Submit" style="width:20px;height:auto;"  />
-    <!-- <img src = "/static/icons/trash3.svg" style="width:20px;height:auto;" type="submit"> -->
   </form></td>
   <td><form action="/edit-version/{{x.id}}" onsubmit="showPleaseWait()">
-    <!-- <button type="submit" class="btn btn-secondary btn-sm">Edit</button> -->
     <input type="image" name="submit" src="/static/icons/pencil.svg" alt="Submit" style="width:20px;height:auto;"/>
   </form></td>
 <td>
-  <a href="/set-version/{{x.id}}" onclick="showPleaseWait()" class="link-offset-2 link-underline link-underline-opacity-0">{{x.name}}</a>
+  <!-- <a>{{x.name}}</a> -->
+  <a href="/set-version/{{x.id}}" onclick="showPleaseWait()" class="version_name link-offset-2 link-underline link-underline-opacity-0">{{x.name}}</a>
   <!-- <a href="#" onclick='setversionAJAX({"id": {{x.id}}})' class="link-offset-2 link-underline link-underline-opacity-0">{{x.name}}</a> -->
   
 

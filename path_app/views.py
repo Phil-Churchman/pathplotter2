@@ -135,24 +135,27 @@ def categories(request):
 
 @login_required
 def versions(request, **kwargs):
-    if CurrentVersion.objects.filter(user=request.user).count() == 0:
-        CurrentVersion.objects.create(user=request.user)
 
     if kwargs["start"] == "start":
         check_db()
     template = loader.get_template('versions.html')
     user = request.user
     versions = Version.objects.filter(user=user, archive=False).order_by("name")
-    # if CurrentVersion.objects.filter(user=request.user).count() == 0:
-    #     CurrentVersion.objects.create(user=request.user, version = list(versions)[0])    
+    [version, state, currentversion] = current_version(request)
+    if version == None:
+        version = list(versions)[0]
+        if currentversion == None:
+            CurrentVersion.objects.create(user=request.user, version = version)    
+        else:
+            currentversion.version = version
+            currentversion.save()
     # versions = list(Version.objects.filter(user=user, archive=False).order_by("name"))
     # versions = sorted(versions,key = lambda x: x.name)
-    [version, state, currentversion] = current_version(request)
+    
     state = "/versions/"
-    if currentversion != None:
-        setattr(currentversion, "state", state)
-        currentversion.save()
-    # form = VersionForm
+    setattr(currentversion, "state", state)
+    currentversion.save()
+    
     for i in versions:
         if i == version:
             i.current = True
@@ -183,7 +186,19 @@ def versions(request, **kwargs):
     'gantt_error_modal': gantt_error_modal,
     'version': version_name
     }
-    return HttpResponse(template.render(context, request))
+
+    if request.method == 'POST':
+        id = request.POST.get("select_version")
+        if id == "None":
+            if currentversion != None:
+                currentversion.delete()
+        currentversion.version = Version.objects.get(id=id)
+        currentversion.save()
+        return HttpResponseRedirect(state)
+
+        # return HttpResponse(template.render(context, request))
+    else:
+        return HttpResponse(template.render(context, request))
 
 @login_required
 def versions_archive(request):
@@ -482,7 +497,7 @@ def network(request, **kwargs):
         "conn_to_goal_legend": json.dumps(conn_to_goal_legend),
         "legend_group": json.dumps([legend_group]),
         "legend_loop": json.dumps([legend_loop]),
-        'version': version.name
+        'version': version.name,
         }
 
     return HttpResponse(template.render(context, request))
@@ -575,10 +590,15 @@ def del_ajax(request):
             try:
                 category = Category.objects.get(id=id)
                 category.delete()
-                
             except:
                 pass
-            
+        elif ob_type == "version":
+            html = "versions.html"
+            try:
+                version = Version.objects.get(id=id)
+                version.delete()
+            except:
+                pass            
         if backup:
             add_backup(request, "generic")
     return render(request,html)  
@@ -592,12 +612,14 @@ def archive_version(request, id):
             return HttpResponseRedirect("/versions/")
     except:
         return HttpResponseRedirect("/versions/")
-    [version, state, currentversion] = current_version(request)
+    [v, state, currentversion] = current_version(request)
     version=Version.objects.get(id=id)
     archived = version.archive
     if archived == False:
-        # if version.id == id:
-        #     currentversion.delete()
+        if v != "None":
+            if v == version:
+                currentversion.delete()
+                CurrentVersion.objects.create(user = request.user)
         setattr(version, "archive", True)
         version.save()
         return HttpResponseRedirect("/versions/")
@@ -605,6 +627,30 @@ def archive_version(request, id):
         setattr(version, "archive", False)
         version.save()
         return HttpResponseRedirect("/versions_archive/")
+
+@login_required
+def archive_ajax(request):
+    [version, state, currentversion] = current_version(request)
+    html = "versions.html" 
+    if request.method == 'POST':
+        post_data=json.loads(request.POST.get('post_data'))
+        id = post_data["id"]
+        [v, state, currentversion] = current_version(request)
+        version=Version.objects.get(id=id)
+        archived = version.archive
+        if archived == False:
+            if v != "None":
+                if v == version:
+                    currentversion.delete()
+                    CurrentVersion.objects.create(user = request.user)
+            setattr(version, "archive", True)
+            version.save()
+        else:
+            setattr(version, "archive", False)
+            version.save()
+
+    return render(request,html)  
+
 
 # edit functions
 
@@ -1147,6 +1193,7 @@ def set_version_ajax(request):
 
 @login_required
 def copy_version(request, id):
+    [v, state, currentversion] = current_version(request)
     try:
         if Version.objects.get(id=id).user != request.user:
             return HttpResponseRedirect("/versions/")
@@ -1161,6 +1208,12 @@ def copy_version(request, id):
         if form.is_valid():
             new_ver = form.save()
             make_copy(old_ver, new_ver)
+            if currentversion == None:
+                CurrentVersion.objects.create(user=request.user, version=new_ver)
+            else:
+                currentversion.version = new_ver
+                currentversion.save()
+
             return HttpResponseRedirect("/versions/")
     context = {}
     form = VersionCopyForm(user=request.user, other_users=True, initial={'name': old_ver.name, "user": request.user})
@@ -1507,23 +1560,24 @@ def export_survey(request, type):
 @login_required
 def export_enabled_nodes(request):
     [version, state, currentversion] = current_version(request)
-    enabled_nodes = list(Node.objects.filter(version=version, enabled=True))
-    for i in list(enabled_nodes):
-        if i.category.enabled == False:
-            enabled_nodes.remove(i)
+    # enabled_nodes = list(Node.objects.filter(version=version, enabled=True))
+    enabled_nodes = list(Node.objects.filter(version=version))
+    # for i in list(enabled_nodes):
+    #     if i.category.enabled == False:
+    #         enabled_nodes.remove(i)
 
     response = HttpResponse(
         content_type="text/csv",
-        headers={"Content-Disposition": 'attachment; filename="enabled_nodes.csv"'},
+        headers={"Content-Disposition": 'attachment; filename="nodes.csv"'},
     )
 
     writer = csv.writer(response)
-    writer.writerow(["Version", "Category code", "Node code", "Description", "Standard"])
+    writer.writerow(["Version", "Category code", "Node code", "Description", "Standard", "Enabled", "Notes"])
     for i in enabled_nodes:
         if i.node_standard != None:
-            writer.writerow([version.name, str(i.category.category_code), str(i.node_code), i.node_text, i.node_standard.code + ": " + i.node_standard.name])
+            writer.writerow([version.name, str(i.category.category_code), str(i.node_code), i.node_text, i.node_standard.code + ": " + i.node_standard.name, i.enabled, i.notes])
         else:
-            writer.writerow([version.name, str(i.category.category_code), str(i.node_code), i.node_text, ""])
+            writer.writerow([version.name, str(i.category.category_code), str(i.node_code), i.node_text, "", i.enabled, i.notes])
 
     return response
 
@@ -1949,7 +2003,6 @@ def add_link_standard(request):
 
     if request.method == 'POST':
         post_data=json.loads(request.POST.get('post_data'))
-        print(post_data)
         id = post_data["id"]
         remove = post_data["remove"]
         html = "links.html"
@@ -2001,7 +2054,7 @@ def apply_link_standards(request):
             continue
         else:
             
-            Link.objects.create(version=version, from_node = from_node, to_node = to_node, notes="Standard link added", xmid=(from_node.xpos + to_node.xpos)/2, ymid=(from_node.ypos + to_node.ypos)/2)
+            Link.objects.create(version=version, from_node = from_node, to_node = to_node, notes="Always true link added", xmid=(from_node.xpos + to_node.xpos)/2, ymid=(from_node.ypos + to_node.ypos)/2)
 
     link_disable = list(LinkStandard.objects.filter(remove=True))
 
@@ -2018,9 +2071,9 @@ def apply_link_standards(request):
             link = Link.objects.get(version=version, from_node = from_node, to_node = to_node)
             setattr(link, "enabled", False)
             if link.notes == None:
-                link.notes = "Disabled as standard link set to remove"
+                link.notes = "Disabled as appears incorrect  / wrong order"
             else:
-                link.notes = "Disabled as standard link set to remove - " + link.notes
+                link.notes = "Disabled as appears incorrect  / wrong order - " + link.notes
             link.save()
 
     add_backup(request, "generic")

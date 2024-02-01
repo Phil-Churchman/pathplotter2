@@ -8,7 +8,7 @@
 <div>
   <nav class="navbar navbar-expand-lg bg-light" id="network_nav">
     <div class="container-fluid">
-      <a class="navbar-brand" href="#">Edit link</a>
+      <a class="navbar-brand" id="sub_brand" href="#">Edit link</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -35,8 +35,8 @@
 
 <a>Nodes:</a>
 <ul class="list-group list-group-flush">
-<li class="list-group-item"><a href="/edit-node/{{ from_node.id}}" class="link-offset-2 link-underline link-underline-opacity-0">{{ from_node.category.category_code }}{{ from_node.node_code }}: {{ from_node.node_text }}</a></li>
-<li class="list-group-item"><a href="/edit-node/{{ to_node.id}}" class="link-offset-2 link-underline link-underline-opacity-0">{{ to_node.category.category_code }}{{ to_node.node_code }}: {{ to_node.node_text }}</a></li>
+<li class="list-group-item"><a href="/edit-node/{{ from_node.id}}" class="link-offset-2 link-underline link-underline-opacity-0 parent">{{ from_node.category.category_code }}{{ from_node.node_code }}: {{ from_node.node_text }}</a></li>
+<li class="list-group-item"><a href="/edit-node/{{ to_node.id}}" class="link-offset-2 link-underline link-underline-opacity-0 parent">{{ to_node.category.category_code }}{{ to_node.node_code }}: {{ to_node.node_text }}</a></li>
 </ul>
 <p></p>
 <form action="/edit-link/{{link_id}}" method="post" onsubmit="showPleaseWait()">

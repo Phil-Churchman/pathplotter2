@@ -118,6 +118,8 @@ urlpatterns = [
 
     path("del-ajax/", views.del_ajax, name="del_ajax"),
 
+    path("archive-ajax/", views.archive_ajax, name="archive_ajax"),
+
     path("enabled_loops_only/", views.enabled_loops_only, name="enabled_loops_only"),
 
     path("export_enabled_nodes/", views.export_enabled_nodes, name="export_enabled_nodes"),

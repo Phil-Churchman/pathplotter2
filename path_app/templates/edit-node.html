@@ -8,7 +8,7 @@
 <div>
   <nav class="navbar navbar-expand-lg bg-light" id="network_nav">
     <div class="container-fluid">
-      <a class="navbar-brand" href="#">Edit node</a>
+      <a class="navbar-brand" id="sub_brand" href="#">Edit node</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -29,7 +29,7 @@
   <p></p>
   <a>Category:</a>
   <ul class="list-group list-group-flush">
-    <li class="list-group-item"><a href="/edit-category/{{ node.category.id}}" class="link-offset-2 link-underline link-underline-opacity-0">{{ node.category.category_code }}: {{ node.category.category_text }}</a></li>
+    <li class="list-group-item"><a href="/edit-category/{{ node.category.id}}" class="link-offset-2 link-underline link-underline-opacity-0 parent">{{ node.category.category_code }}: {{ node.category.category_text }}</a></li>
     </ul>
     <p></p>
 <form action="/edit-node/{{node_id}}" method="post" onsubmit="showPleaseWait()">
