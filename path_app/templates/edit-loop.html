@@ -32,7 +32,12 @@
 <a>Links:</a>
 <ul class="list-group list-group-flush">
 {% for x in links %}
+{% if x.enabled %}
 <li class="list-group-item"><a href="/edit-link/{{x.id}}" class="link-offset-2 link-underline link-underline-opacity-0 parent">{{ x.from_node }} - {{ x.to_node }}</a></li>
+{% else %}
+<li class="list-group-item"><a href="/edit-link/{{x.id}}" class="link-offset-2 link-underline link-underline-opacity-0 parent-disabled">{{ x.from_node }} - {{ x.to_node }}</a></li>
+
+{% endif %}
 {% endfor %}
 </ul>
 <p></p>

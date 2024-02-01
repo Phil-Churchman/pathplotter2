@@ -35,8 +35,18 @@
 
 <a>Nodes:</a>
 <ul class="list-group list-group-flush">
+  {% if from_node.enabled %}
 <li class="list-group-item"><a href="/edit-node/{{ from_node.id}}" class="link-offset-2 link-underline link-underline-opacity-0 parent">{{ from_node.category.category_code }}{{ from_node.node_code }}: {{ from_node.node_text }}</a></li>
+{% else %}
+<li class="list-group-item"><a href="/edit-node/{{ from_node.id}}" class="link-offset-2 link-underline link-underline-opacity-0 parent-disabled">{{ from_node.category.category_code }}{{ from_node.node_code }}: {{ from_node.node_text }}</a></li>
+{% endif %}
+
+{% if to_node.enabled %}
 <li class="list-group-item"><a href="/edit-node/{{ to_node.id}}" class="link-offset-2 link-underline link-underline-opacity-0 parent">{{ to_node.category.category_code }}{{ to_node.node_code }}: {{ to_node.node_text }}</a></li>
+{% else %}
+<li class="list-group-item"><a href="/edit-node/{{ to_node.id}}" class="link-offset-2 link-underline link-underline-opacity-0 parent-disabled">{{ to_node.category.category_code }}{{ to_node.node_code }}: {{ to_node.node_text }}</a></li>
+{% endif %}
+
 </ul>
 <p></p>
 <form action="/edit-link/{{link_id}}" method="post" onsubmit="showPleaseWait()">

@@ -29,8 +29,13 @@
   <p></p>
   <a>Category:</a>
   <ul class="list-group list-group-flush">
+    {% if node.category.enabled %}
     <li class="list-group-item"><a href="/edit-category/{{ node.category.id}}" class="link-offset-2 link-underline link-underline-opacity-0 parent">{{ node.category.category_code }}: {{ node.category.category_text }}</a></li>
-    </ul>
+    {% else %}  
+    <li class="list-group-item"><a href="/edit-category/{{ node.category.id}}" class="link-offset-2 link-underline link-underline-opacity-0 parent-disabled">{{ node.category.category_code }}: {{ node.category.category_text }}</a></li>
+
+    {% endif %}  
+  </ul>
     <p></p>
 <form action="/edit-node/{{node_id}}" method="post" onsubmit="showPleaseWait()">
   {%csrf_token%}
