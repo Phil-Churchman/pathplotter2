@@ -110,9 +110,18 @@
   <!-- <button type="submit" class="btn btn-secondary btn-sm">Edit</button> -->
   <input type="image" name="submit" src="/static/icons/pencil.svg" alt="Submit" style="width:20px;height:auto;"/>
 
-</form></td>
+</form>
+</td>
 <td style="padding-left:20px">
-  <a>{{x.loop_code}}</a>
+{% if x.enabled %}
+<a  id="name{{x.id}}" class="item{{x.id}} parent" href="/edit-loop/{{x.id}}">{{x.loop_code}}</a>
+{% else %}
+<a  id="name{{x.id}}" class="item{{x.id}} parent-disabled" href="/edit-loop/{{x.id}}">{{x.loop_code}}</a>
+
+  {% endif %}
+
+
+  <!-- <a>{{x.loop_code}}</a> -->
   </td>
 
 </tr>

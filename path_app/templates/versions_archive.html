@@ -36,7 +36,7 @@
   <td>
 
     <form id="del{{x.id}}" onsubmit="return false;">
-      <input type="image" src="/static/icons/trash3.svg" value='{"id": {{x.id}}, "ob_type": "version", "backup": false}' onclick="delAJAX(this.value)" style="width:20px;height:auto;"/>
+      <input class="delete" type="image" src="/static/icons/trash3.svg" value='{"id": {{x.id}}, "ob_type": "version", "backup": false}' onclick="delAJAX(this.value)" style="width:20px;height:auto;"/>
     </form>
     
     <!-- <form action="/del-version/{{x.id}}">
@@ -47,7 +47,7 @@
   <td>
     
     <form id="archive{{x.id}}" onsubmit="return false;">
-      <input type="image" src="/static/icons/archive.svg" value='{"id": {{x.id}}}' onclick="archiveAJAX(this.value)" style="width:20px;height:auto;"/>
+      <input type="image" src="/static/icons/archive-fill.svg" value='{"id": {{x.id}}}' onclick="archiveAJAX(this.value)" style="width:20px;height:auto;"/>
     </form>
 
     <!-- <form action="/archive-version/{{x.id}}">

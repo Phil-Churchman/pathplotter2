@@ -1,123 +1,174 @@
-{% extends "master.html" %}
-
-{% block title %}
-    <title>Nodes</title>
-{% endblock %}
-{% block submenu %}
+{% extends "master.html" %} {% block title %}
+<title>Nodes</title>
+{% endblock %} {% block submenu %}
 <div>
   <nav class="navbar navbar-expand-lg bg-light" id="network_nav">
     <div class="container-fluid">
       <a class="navbar-brand" id="sub_brand" href="#">Nodes</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-
           <li class="nav-item">
             <!-- <a class="nav-link" aria-current="page" href="/add-node/">Add node</a> -->
             <!-- <a class="nav-link" aria-current="page" data-bs-toggle="offcanvas" href="#nodeSidebar" role="button" aria-controls="offcanvasExample">Add node</a> -->
-              <a class="nav-link" aria-current="page" href="/add-node/">Add node</a>
+            <a class="nav-link" aria-current="page" href="/add-node/"
+              >Add node</a
+            >
           </li>
           {% if standardise %}
           <li class="nav-item">
-            <a class="nav-link" aria-current="page" href="/standardise_nodes/">Standardise nodes</a>
-          </li>               
-          {% endif %}         
+            <a class="nav-link" aria-current="page" href="/standardise_nodes/"
+              >Standardise nodes</a
+            >
+          </li>
+          {% endif %}
         </ul>
       </div>
     </div>
   </nav>
-  </div>
+</div>
 
-{% endblock %}
-{% block content %}
+{% endblock %} {% block content %}
 <div class="container">
+  <table class="table table-borderless align-middle w-auto">
+    <th scope="col"></th>
+    <th scope="col"></th>
+    <th scope="col"></th>
+    <th scope="col"></th>
+    <th scope="col"></th>
 
-<table class="table table-borderless align-middle w-auto">
-
-  <th scope="col"></th>
-  <th scope="col"></th>
-  <th scope="col"></th>
-  <th scope="col"></th>
-  <th scope="col"></th>
-
-
-  <tr>
+    <tr>
       <td></td>
       <td></td>
       <td></td>
-    <td colspan=2>
-      <div class="dropdown" >
-
-        <button class="form-select" style="text-align: left;" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-          {{category}}
-        </button>
-        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-          <li><a class="dropdown-item" href="/nodes/all/">All categories</a></li>
-          {% for x in categories %}
-          <li><a class="dropdown-item" href="/nodes/{{ x.id }}/">{{ x.category_code }}: {{ x.category_text }}</a></li>
-          {% endfor %}
-      
-        </ul>
-      </div>
-    </td>
-  </tr>
+      <td colspan="2">
+        <div class="dropdown">
+          <button
+            class="form-select"
+            style="text-align: left"
+            type="button"
+            id="dropdownMenuButton1"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            {{category}}
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+            <li>
+              <a class="dropdown-item" href="/nodes/all/">All categories</a>
+            </li>
+            {% for x in categories %}
+            <li>
+              <a class="dropdown-item" href="/nodes/{{ x.id }}/"
+                >{{ x.category_code }}: {{ x.category_text }}</a
+              >
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </td>
+    </tr>
     {% for x in nodes %}
 
+    <tr id="row{{x.id}}">
+      <td style="padding: 0px">
+        <form id="del{{x.id}}" onsubmit="return false;">
+          <!-- {% csrf_token %} -->
+          <!-- <input type="hidden" id="del_node" type="text" name="del_node" value={{x.id}}> -->
+          <!-- <button type="submit" class="btn btn-secondary btn-sm">Delete</button> -->
+          <input
+            type="image"
+            src="/static/icons/trash3.svg"
+            value='{"id": {{x.id}}, "ob_type": "node", "backup": true}'
+            onclick="delAJAX(this.value)"
+            style="width: 20px; height: auto"
+          />
+        </form>
+      </td>
+      <td style="padding-right: 0px; padding-left: 10px">
+        <div class="container">
+          <form method="post" id="switch{{x.id}}">
+            <div
+              class="form-check form-switch"
+              style="align-items: center; text-align: center"
+            >
+              {% if x.enabled %}
+              <!-- <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" onchange=this.form.submit() checked> -->
+              <input
+                class="form-check-input"
+                type="checkbox"
+                id="toggle{{x.id}}"
+                value='{"id": {{x.id}}, "ob_type": "node", "check": "false", "text": "{{x.node_text}}"}'
+                onchange="saveSwitch(this.value)"
+                checked
+              />
+              {% else %}
+              <!-- <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" onchange=this.form.submit()> -->
+              <input
+                class="form-check-input"
+                type="checkbox"
+                id="toggle{{x.id}}"
+                value='{"id": {{x.id}}, "ob_type": "node", "check": "true", "text": "{{x.node_text}}"}'
+                onchange="saveSwitch(this.value)"
+              />
+              {% endif %}
+            </div>
+          </form>
+        </div>
+      </td>
 
-<tr id="row{{x.id}}">
-  <td style="padding:0px">
-    <form id="del{{x.id}}" onsubmit="return false;">
-    <!-- {% csrf_token %} -->
-    <!-- <input type="hidden" id="del_node" type="text" name="del_node" value={{x.id}}> -->
-    <!-- <button type="submit" class="btn btn-secondary btn-sm">Delete</button> -->
-    <input type="image" src="/static/icons/trash3.svg" value='{"id": {{x.id}}, "ob_type": "node", "backup": true}' onclick="delAJAX(this.value)" style="width:20px;height:auto;"/>
-  </form>
-  </td>
-  <td style="padding-right:0px; padding-left:10px">
-    <div class="container">
-  <form method="post" id="switch{{x.id}}">
-    <div class="form-check form-switch"  style="align-items: center; text-align:center">
-      {% if x.enabled %}
-      <!-- <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" onchange=this.form.submit() checked> -->
-      <input class="form-check-input" type="checkbox" id="toggle{{x.id}}" value='{"id": {{x.id}}, "ob_type": "node"}' onchange="saveSwitch(this.value)" checked>
-      {% else %}
-      <!-- <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" onchange=this.form.submit()> -->
-      <input class="form-check-input" type="checkbox" id="toggle{{x.id}}" value='{"id": {{x.id}}, "ob_type": "node"}' onchange="saveSwitch(this.value)">
-      {% endif %}
-    </div>
-  </form>
-  </div>
-  </td>
+      <td style="padding: 0px">
+        <form action="/edit-node/{{x.id}}" onsubmit="showPleaseWait()">
+          <!-- <button type="submit" class="btn btn-secondary btn-sm">Edit</button> -->
+          <input
+            type="image"
+            name="submit"
+            src="/static/icons/pencil.svg"
+            alt="Submit"
+            style="width: 20px; height: auto"
+          />
+        </form>
+      </td>
 
-<td style="padding:0px"><form action="/edit-node/{{x.id}}" onsubmit="showPleaseWait()">
-  <!-- <button type="submit" class="btn btn-secondary btn-sm">Edit</button> -->
-  <input type="image" name="submit" src="/static/icons/pencil.svg" alt="Submit" style="width:20px;height:auto;"/>
-</form></td>
-
-<!-- <td class="text-center">
+      <!-- <td class="text-center">
   <button class="btn btn-secondary btn-sm" onclick="editNode('{{x}}')">Edit</button>
 </td> -->
 
+      <td style="padding-left: 20px">
+        <a>{{x.category.category_code}}:{{x.node_code}}</a>
+      </td>
 
+      <td>
+        {% if x.enabled %}
+        <a
+          id="name{{x.id}}"
+          class="item{{x.id}} parent"
+          href="/edit-node/{{x.id}}"
+          >{{x.node_text}}</a
+        >
+        {% else %}
+        <a
+          id="name{{x.id}}"
+          class="item{{x.id}} parent-disabled"
+          href="/edit-node/{{x.id}}"
+          >{{x.node_text}}</a
+        >
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
 
-
-  <td style="padding-left:20px">
-    <a>{{x.category.category_code}}:{{x.node_code}}</a>
-    </td>
-
-  <td>
-    <a>{{x.node_text}}</a>
-    </td>
-
-</tr>
-{% endfor %}
-
-</table>
-
-
-<p></p>
-
+  <p></p>
 </div>
 {% endblock %}

@@ -39,6 +39,18 @@
 
 {% endif %}
 {% endfor %}
+<p></p>
+<a>Nodes:</a>
+<ul class="list-group list-group-flush">
+{% for x in nodes %}
+{% if x.enabled %}
+<li class="list-group-item"><a href="/edit-node/{{x.id}}" class="link-offset-2 link-underline link-underline-opacity-0 parent">{{ x.category.category_code }}{{ x.node_code }}: {{ x.node_text }}</a></li>
+{% else %}
+<li class="list-group-item"><a href="/edit-node/{{x.id}}" class="link-offset-2 link-underline link-underline-opacity-0 parent-disabled">{{ x.category.category_code }}{{ x.node_code }}: {{ x.node_text }}</a></li>
+
+{% endif %}
+{% endfor %}
+
 </ul>
 <p></p>
 

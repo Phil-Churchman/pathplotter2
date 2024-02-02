@@ -73,14 +73,22 @@
 <td></td>
 <td></td>
 {% endif %}
-
 <td style="padding-left:20px">
   <a>{{x.category_code}}</a>
 </td>
-<td>
-  <a>{{x.category_text}}</a>
-</td>
 
+<td>
+  {% if x.editable %}
+  {% if x.enabled %}
+  <a  id="name{{x.id}}" class="item{{x.id}} parent" href="/edit-category/{{x.id}}">{{x.category_text}}</a>
+  {% else %}
+  <a  id="name{{x.id}}" class="item{{x.id}} parent-disabled" href="/edit-category/{{x.id}}"
+    >{{x.category_text}}</a>
+  {% endif %}
+  {% else%}
+  <a>{{x.category_text}}</a>
+  {% endif %}
+</td>
 
 </tr>
 {% endfor %}

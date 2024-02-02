@@ -315,7 +315,8 @@ def links(request):
         'form': form,
         'links': links,
         'categories': categories,
-        'superuser': request.user.is_superuser,
+        # 'superuser': request.user.is_superuser,
+        'superuser': False,
         'version': version.name
         }
     return HttpResponse(template.render(context, request))
@@ -716,9 +717,11 @@ def edit_loop(request, id):
         to_node = links_sorted[-1].to_node
         next_link = list(filter(lambda x: x.from_node == to_node, links))[0]
         links_sorted.append(next_link)
-    links = sorted(links, key = lambda x: x.from_node.category.category_code + x.from_node.node_code)
+    # links = sorted(links, key = lambda x: x.from_node.category.category_code + x.from_node.node_code)
+    nodes = [i.from_node for i in links_sorted]
     context = {}
     context["links"] = links_sorted
+    context["nodes"] = nodes
     context["form"] = form
     context["id"] = id
     context["name"] = get_loop_code(Loop.objects.get(id=id))
@@ -2005,6 +2008,10 @@ def add_link_standard(request):
         post_data=json.loads(request.POST.get('post_data'))
         id = post_data["id"]
         remove = post_data["remove"]
+        if remove == "true":
+            remove = True
+        elif remove == "false":
+            remove = False
         html = "links.html"
 
     try:
@@ -2023,11 +2030,17 @@ def add_link_standard(request):
         return render(request,html) 
     else:
         to_node_standard = NodeStandard.objects.get(code = link.to_node.category.category_code, name=link.to_node.node_text)    
-    if LinkStandard.objects.filter(from_node_standard = from_node_standard, to_node_standard = to_node_standard).count() != 0:
-        return render(request,html) 
+    if remove != "cancel":
+        if LinkStandard.objects.filter(from_node_standard = from_node_standard, to_node_standard = to_node_standard).count() != 0:
+            linkstandard = LinkStandard.objects.get(from_node_standard = from_node_standard, to_node_standard = to_node_standard)
+            linkstandard.remove = remove
+            linkstandard.save()
+        else:
+            LinkStandard.objects.create(from_node_standard = from_node_standard, to_node_standard = to_node_standard, remove=remove)
     else:
-        LinkStandard.objects.create(from_node_standard = from_node_standard, to_node_standard = to_node_standard, remove=remove)
-        
+        if LinkStandard.objects.filter(from_node_standard = from_node_standard, to_node_standard = to_node_standard).count() != 0:
+            LinkStandard.objects.get(from_node_standard = from_node_standard, to_node_standard = to_node_standard).delete()
+    
     return render(request,html) 
 
 @login_required
