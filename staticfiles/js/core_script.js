@@ -52,7 +52,7 @@ function saveSwitch(data) {
   var id = data["id"];
 
   var items = Array.from(document.getElementsByClassName("item" + String(id)));
-  for (let i=0; i<items.length; i++) {
+  for (let i = 0; i < items.length; i++) {
     items[i].classList.toggle("parent");
     items[i].classList.toggle("parent-disabled");
   }
@@ -141,15 +141,17 @@ function archiveAJAX(data) {
 function standardAJAX(data) {
   sendAJAXRequest(data, "/add_link_standard/");
 
-  var data = JSON.parse(data)
-  var id = data["id"]
-  var remove = data["remove"]
+  var data = JSON.parse(data);
+  var id = data["id"];
+  var remove = data["remove"];
 
-  var icon = document.getElementById(link + remove + String(id))
-  icon.classList.toggle("standard")
-  icon.classList.toggle("standard-clicked")
-
-
+  var icon = document.getElementById("link" + remove + String(id));
+  icon.classList.toggle("standard");
+  icon.classList.toggle("standard-clicked");
+  setTimeout(() => {
+    icon.classList.toggle("standard");
+    icon.classList.toggle("standard-clicked");
+  }, 500)
 }
 
 function setversionAJAX(data) {
