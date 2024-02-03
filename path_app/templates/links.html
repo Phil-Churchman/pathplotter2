@@ -214,32 +214,38 @@
           />
         </form>
       </td>
+      {% if x.enabled %}
+      <td style="padding-left: 20px">
+        <a id="from_code{{x.id}}" class="item{{x.id}} parent" href="/edit-link/{{x.id}}">{{x.from_node.category.category_code}}:{{x.from_node.node_code}}</a>
+      </td>
+      <td>
 
-      <td style="padding-left: 20px">
-        <a>{{x.from_node.category.category_code}}:{{x.from_node.node_code}}</a>
-      </td>
-      <td>
-        {% if x.enabled %}
         <a
           id="from_node{{x.id}}"
           class="item{{x.id}} parent"
           href="/edit-link/{{x.id}}"
           >{{x.from_node.node_text}}</a
         >
+      </td>
         {% else %}
+        <td style="padding-left: 20px">
+          <a id="from_code{{x.id}}" class="item{{x.id}} parent-disabled" href="/edit-link/{{x.id}}">{{x.from_node.category.category_code}}:{{x.from_node.node_code}}</a>
+        </td>
+        <td>        
         <a
           id="from_node{{x.id}}"
           class="item{{x.id}} parent-disabled"
           href="/edit-link/{{x.id}}"
           >{{x.from_node.node_text}}</a
         >
+      </td>
         {% endif %}
-      </td>
+        {% if x.enabled %}
       <td style="padding-left: 20px">
-        <a>{{x.to_node.category.category_code}}:{{x.to_node.node_code}}</a>
+        <a id="to_code{{x.id}}" class="item{{x.id}} parent" href="/edit-link/{{x.id}}">{{x.to_node.category.category_code}}:{{x.to_node.node_code}}</a>
       </td>
       <td>
-        {% if x.enabled %}
+
         <a
           id="to_node{{x.id}}"
           class="item{{x.id}} parent"
@@ -247,7 +253,13 @@
           href="/edit-link/{{x.id}}"
           >{{x.to_node.node_text}}</a
         >
+      </td>
         {% else %}
+        <td style="padding-left: 20px">
+          <a id="to_code{{x.id}}" class="item{{x.id}} parent-disabled" href="/edit-link/{{x.id}}">{{x.to_node.category.category_code}}:{{x.to_node.node_code}}</a>
+        </td>
+        <td>
+  
         <a
           id="to_node{{x.id}}"
           class="item{{x.id}} parent-disabled"
@@ -255,6 +267,7 @@
           href="/edit-link/{{x.id}}"
           >{{x.to_node.node_text}}</a
         >
+      </td>
         {% endif %}
       </td>
     </tr>
