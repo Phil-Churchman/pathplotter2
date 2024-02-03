@@ -315,8 +315,8 @@ def links(request):
         'form': form,
         'links': links,
         'categories': categories,
-        # 'superuser': request.user.is_superuser,
-        'superuser': False,
+        'superuser': request.user.is_superuser and NetworkParam.objects.get(version=version).Edit_standard_links,
+        # 'superuser': False,
         'version': version.name
         }
     return HttpResponse(template.render(context, request))

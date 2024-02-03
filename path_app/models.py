@@ -241,6 +241,7 @@ class NetworkParam(models.Model):
     Auto_layout = models.ForeignKey(Auto_layout_option, on_delete=models.CASCADE, default=get_default_auto_layout)
     Show_unconnected = models.BooleanField(default=True)
     Enabled_loops_only = models.BooleanField(default=False)
+    Edit_standard_links = models.BooleanField(default=False)
     copied_to = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):

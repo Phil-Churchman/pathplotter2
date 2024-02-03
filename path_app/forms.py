@@ -215,7 +215,7 @@ class NetworkParamForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(NetworkParamForm, self).__init__(*args, **kwargs)
         for field in self.fields.keys():
-            if field in ["Slow_motion", "Hide_links", "Link_midpoints", "Show_arrows", "Include_Goals_in_key", "Show_unconnected"]:
+            if field in ["Slow_motion", "Hide_links", "Link_midpoints", "Show_arrows", "Include_Goals_in_key", "Show_unconnected", "Edit_standard_links"]:
                 continue
             self.fields[field].widget.attrs.update({
                 'class': 'form-control',
