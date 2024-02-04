@@ -1899,10 +1899,10 @@ def import_version(request):
         if form.is_valid():
             
             if request.FILES:
+                # try:
+                myfile = request.FILES.get('myfile')
+                # filename = os.path.splitext(myfile.name)[0]
                 try:
-                    myfile = request.FILES.get('myfile')
-                    # filename = os.path.splitext(myfile.name)[0]
-                    # try:
                     filedata = json.load(myfile)
                     version = form.save()
                     import_standard = request.POST.get("import_standard")
@@ -1930,7 +1930,7 @@ def import_version(request):
                                 get_dict={}
                                 create_dict={}
                                 for k in j.keys():
-                                    if k in ["id", "copied_to", "temp"]:continue
+                                    if k in ["id", "copied_to", "temp", "date_added"]:continue
                                     if import_standard == False:
                                         if k in ["node_standard"]:continue
                                     if k == "version":
