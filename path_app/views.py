@@ -150,12 +150,12 @@ def versions(request, **kwargs):
     versions = Version.objects.filter(user=user, archive=False).order_by("name")
     [version, state, currentversion] = current_version(request)
     if version == None:
-        version = list(versions)[0]
-        if currentversion == None:
+        if len(versions) > 0:
+            version = list(versions)[0]
             CurrentVersion.objects.create(user=request.user, version = version)    
-        else:
-            currentversion.version = version
-            currentversion.save()
+    else:
+        currentversion.version = version
+        currentversion.save()
     # versions = list(Version.objects.filter(user=user, archive=False).order_by("name"))
     # versions = sorted(versions,key = lambda x: x.name)
     
@@ -186,8 +186,8 @@ def versions(request, **kwargs):
     # 'form': form,
     # 'standardise': standardise,
     'versions': versions,
-    'version_not_selected': not check_version_selected(version),
-    # 'version_not_selected': len(versions) == 0,
+    # 'version_not_selected': not check_version_selected(version),
+    'version_not_selected': len(versions) == 0,
 
     'fail_modal': fail_modal,
     'gantt_error_modal': gantt_error_modal,
