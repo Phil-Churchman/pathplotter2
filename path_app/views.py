@@ -994,6 +994,7 @@ def add_category(request):
 @login_required    
 def add_version(request):
     [version, state, currentversion] = current_version(request)
+    versions = Version.objects.filter(user=request.user, archive=False).order_by("name")
     if request.method == 'POST':    
         post = copy.deepcopy(request.POST)
         post.update({"user": request.user})  
@@ -1029,7 +1030,10 @@ def add_version(request):
 
     context = {}
     form = VersionAddForm(user=request.user, other_users=False, initial={"user": request.user})
-    context['form'] = form
+    context = {
+        'form': form,
+        'version_not_selected': len(versions) == 0,
+    }
     return render(request, 'add-version.html', context)
 
 # enable / disable
@@ -1466,6 +1470,7 @@ def redo(request):
 @login_required
 def upload_file(request):
     [v, state, currentversion] = current_version(request)
+    versions = Version.objects.filter(user=request.user, archive=False).order_by("name")
 
     if request.method == 'POST':
         form = VersionForm(request.POST, request.FILES, user=request.user, other_users=False)
@@ -1488,12 +1493,19 @@ def upload_file(request):
                 # add_backup(request, "generic")
                 return HttpResponseRedirect("/versions/")
 
-        context = {}
+        context = {
+            'form': form,
+            'version_not_selected': len(versions) == 0,
+        }
         context['form'] = form
         return render(request, 'upload-file.html', context)
     else:
-        context = {}
         form = VersionForm(user=request.user, other_users=False, initial={"user": request.user})
+        context = {
+            'form': form,
+            'version_not_selected': len(versions) == 0,
+        }
+        
         context['form'] = form
     return render(request, 'upload-file.html', context)
 
@@ -1879,6 +1891,7 @@ def export_version(request):
 def import_version(request):
 
     [v, state, currentversion] = current_version(request)
+    versions = Version.objects.filter(user=request.user, archive=False).order_by("name")
 
     if request.method == 'POST':
         form = VersionImportForm(request.POST, request.FILES, user=request.user, other_users=False)
@@ -1942,14 +1955,19 @@ def import_version(request):
 
         # "Node": ( Node, ["category", "version", "node_standard"], ["version", "category", "node_code"]),
 
-        context = {}
-        context['form'] = form
+        context = {
+            'form': form,
+            'version_not_selected': len(versions) == 0,
+    }
         return render(request, 'import_version.html', context)
     else:
         context = {}
         form = VersionImportForm(user=request.user, other_users=False, initial={"user": request.user})
 
-        context['form'] = form
+        context = {
+            'form': form,
+            'version_not_selected': len(versions) == 0,
+    }
     return render(request, 'import_version.html', context)
 
 # Standardise nodes
