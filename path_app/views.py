@@ -15,6 +15,7 @@ from io import StringIO
 import copy
 from .admin import *
 from django.apps import apps
+from datetime import datetime
 
 model_dict = {
     CategoryResource: (True, "Category", Category),
@@ -31,8 +32,10 @@ model_dict = {
     X_axis_optionResource: (False, "X_axis_option", X_axis_option),
     Timing_optionResource: (False, "Timing_option", Timing_option),
     Duration_optionResource: (False, "Duration_option", Duration_option),
+    CategoryStandardResource: (False, "CategoryStandard", CategoryStandard),
     NodeStandardResource: (False, "NodeStandard", NodeStandard),
     LinkStandardResource: (False, "LinkStandard", LinkStandard),
+
 }
 
 model_dict_import = {
@@ -45,6 +48,7 @@ model_dict_import = {
     "X_axis_option": ( X_axis_option, [], ["option"]),
     "Timing_option": ( Timing_option, [], ["option"]),
     "Duration_option": ( Duration_option, [], ["option"]),
+    "CategoryStandard": ( CategoryStandard, [], ["code", "name"]),
     "NodeStandard": ( NodeStandard, [], ["code", "name"]),
     "LinkStandard": ( LinkStandard, ["from_node_standard", "to_node_standard"], ["from_node_standard", "to_node_standard"]),
     "Category": ( Category, ["version"], ["version", "category_code"]),
@@ -122,6 +126,9 @@ def categories(request):
     template = loader.get_template('categories.html')
 
     categories = sorted(Category.objects.filter(version=version), key = lambda x: x.category_code)
+    goals = list(filter(lambda x: x.category_code==">", categories))
+    for i in goals:
+        categories.insert(0, categories.pop(categories.index(i)))    
     for i in categories:
         i.editable = (i.category_code != ">")
         i.save()
@@ -243,6 +250,10 @@ def nodes(request, category):
     else:
         nodes = Node.objects.filter(version=version, category=category)
     nodes = sorted(list(nodes), key=lambda x: [x.category.category_code, x.node_code])
+    goals = list(filter(lambda x: x.category.category_code==">", nodes))
+    for i in goals:
+        nodes.insert(0, nodes.pop(nodes.index(i)))
+
     categories = sorted(Category.objects.filter(version=version), key = lambda x: x.category_code)
     add_form = NodeForm
     add_form.initial = {"enabled": True, "weight": 1}
@@ -282,23 +293,43 @@ def links(request):
     setattr(currentversion, "state", state)
     currentversion.save()
     template = loader.get_template('links.html')
-    form = LinkForm(version=version)
-    from_category = "All"
-    to_category = "All"   
 
     if request.method == 'POST':
-
         form = LinkForm(request.POST, version=version)
         from_category = request.POST.get("from_category")
         to_category = request.POST.get("to_category")
+        if from_category == "All":
+            currentversion.from_selected = None
+        else:
+            currentversion.from_selected = Category.objects.get(id=from_category)
+        if to_category == "All":
+            currentversion.to_selected = None
+        else:
+            currentversion.to_selected = Category.objects.get(id=to_category)      
+        currentversion.save()  
+    else:
+        form = LinkForm(version=version)
+        from_selected=currentversion.from_selected
+        to_selected=currentversion.to_selected
+        if from_selected == None:
+            from_category = "All"
+        else:
+            from_category = from_selected.id
+        if to_selected == None:
+            to_category = "All"
+        else:
+            to_category = to_selected.id
 
     links = list(Link.objects.filter(version=version))
+    category_codes = [i.category_code for i in Category.objects.filter(version=version)]
+    category_codes.sort()
+    category_codes.insert(0,category_codes.pop(category_codes.index(">")))
     if from_category != "All":
         links = list(filter(lambda x: str(x.from_node.category.id) == str(from_category), links))
     if to_category != "All":
         links = list(filter(lambda x: str(x.to_node.category.id) == str(to_category), links))
-    links = sorted(links, key=lambda x: [x.from_node.category.category_code, x.from_node.node_code, x.to_node.category.category_code, x.to_node.node_code])
-    categories = sorted(Category.objects.filter(version=version), key = lambda x: x.category_code)
+    links = sorted(links, key=lambda x: [category_codes.index(x.from_node.category.category_code), x.from_node.node_code, category_codes.index(x.to_node.category.category_code), x.to_node.node_code])
+    categories = sorted(Category.objects.filter(version=version), key = lambda x: category_codes.index(x.category_code))
     for i in categories:
         if str(i.id) == str(from_category):
             i.from_category = True
@@ -317,7 +348,10 @@ def links(request):
         'categories': categories,
         'superuser': request.user.is_superuser and NetworkParam.objects.get(version=version).Edit_standard_links,
         # 'superuser': False,
-        'version': version.name
+        'version': version.name,
+        'from_category': from_category,
+        'to_category': to_category,
+
         }
     return HttpResponse(template.render(context, request))
 
@@ -959,16 +993,33 @@ def add_category(request):
 
 @login_required    
 def add_version(request):
+    [version, state, currentversion] = current_version(request)
     if request.method == 'POST':    
         post = copy.deepcopy(request.POST)
         post.update({"user": request.user})  
-        form = VersionForm(post, user=request.user, other_users=False)
+        form = VersionAddForm(post, user=request.user, other_users=False)
       
         if form.is_valid():
             version = form.save()
-            if CurrentVersion.objects.all().count() == 0:
+            create_standard_elements = post.get("create_standard_elements")
+            if create_standard_elements == "on": create_standard_elements = True
+            else: create_standard_elements = False
+            if currentversion == None:
                 CurrentVersion.objects.create(user=request.user, version=version)
-
+            else:
+                currentversion.version = version
+                currentversion.save()
+            objects = Category.objects.filter(version=version, category_code=">")
+            if objects.count() == 0:
+                Category.objects.create(version=version, category_code=">", category_text="Goals")
+            if create_standard_elements:
+                add_category_standards(request)
+                add_node_standards(request)
+                apply_link_standards(request)
+            if NetworkParam.objects.filter(version=version).count() == 0:
+                NetworkParam.objects.create(version=version)
+            if GanttParam.objects.filter(version=version).count() == 0:
+                GanttParam.objects.create(version=version)
             return HttpResponseRedirect("/versions/")
         else:
             context = {}
@@ -977,7 +1028,7 @@ def add_version(request):
             return render(request, 'add-version.html', context)
 
     context = {}
-    form = VersionForm(user=request.user, other_users=False, initial={"user": request.user})
+    form = VersionAddForm(user=request.user, other_users=False, initial={"user": request.user})
     context['form'] = form
     return render(request, 'add-version.html', context)
 
@@ -1745,11 +1796,11 @@ def export_standard_links(request):
         headers={"Content-Disposition": 'attachment; filename="standard_links.csv"'},
     )    
     writer = csv.writer(response)
-    writer.writerow(["From node", "To node", "Remove"])
+    writer.writerow(["From node", "To node", "Remove", "Version", "User", "Date"])
 
     for i in standard_links:
 
-        writer.writerow([i.from_node_standard.code + ": " + i.from_node_standard.name, i.to_node_standard.code + ": " + i.to_node_standard.name, i.remove])
+        writer.writerow([i.from_node_standard.code + ": " + i.from_node_standard.name, i.to_node_standard.code + ": " + i.to_node_standard.name, i.remove, i.version_name, i.user_name, i.date_added])
 
     return response
 
@@ -1830,16 +1881,22 @@ def import_version(request):
     [v, state, currentversion] = current_version(request)
 
     if request.method == 'POST':
-        form = VersionForm(request.POST, request.FILES, user=request.user, other_users=False)
+        form = VersionImportForm(request.POST, request.FILES, user=request.user, other_users=False)
 
         if form.is_valid():
             
             if request.FILES:
                 try:
                     myfile = request.FILES.get('myfile')
+                    # filename = os.path.splitext(myfile.name)[0]
                     # try:
                     filedata = json.load(myfile)
                     version = form.save()
+                    import_standard = request.POST.get("import_standard")
+                    if import_standard == "on":
+                        import_standard = True
+                    else:
+                        import_standard = False
                     if currentversion != None:
                         currentversion.version = version
                         currentversion.history = None
@@ -1852,6 +1909,8 @@ def import_version(request):
                     id_dict = {}
                     
                     for i in model_dict_import.keys():
+                        if import_standard == False:
+                            if i in ["CategoryStandard", "NodeStandard", "LinkStandard"]:continue
                         records = filedata[i]
                         for j in records:
                             
@@ -1859,6 +1918,8 @@ def import_version(request):
                                 create_dict={}
                                 for k in j.keys():
                                     if k in ["id", "copied_to", "temp"]:continue
+                                    if import_standard == False:
+                                        if k in ["node_standard"]:continue
                                     if k == "version":
                                         create_dict["version"] = version
                                     elif k in model_dict_import[i][1]:
@@ -1886,7 +1947,7 @@ def import_version(request):
         return render(request, 'import_version.html', context)
     else:
         context = {}
-        form = VersionForm(user=request.user, other_users=False, initial={"user": request.user})
+        form = VersionImportForm(user=request.user, other_users=False, initial={"user": request.user})
 
         context['form'] = form
     return render(request, 'import_version.html', context)
@@ -2002,7 +2063,7 @@ def standardise_nodes(request):
     
 @login_required
 def add_link_standard(request):
-
+    [version, state, currentversion] = current_version(request)
 
     if request.method == 'POST':
         post_data=json.loads(request.POST.get('post_data'))
@@ -2034,9 +2095,12 @@ def add_link_standard(request):
         if LinkStandard.objects.filter(from_node_standard = from_node_standard, to_node_standard = to_node_standard).count() != 0:
             linkstandard = LinkStandard.objects.get(from_node_standard = from_node_standard, to_node_standard = to_node_standard)
             linkstandard.remove = remove
+            linkstandard.version_name = version.name
+            linkstandard.user_name = request.user.username
+            linkstandard.date_added = datetime.now()
             linkstandard.save()
         else:
-            LinkStandard.objects.create(from_node_standard = from_node_standard, to_node_standard = to_node_standard, remove=remove)
+            LinkStandard.objects.create(from_node_standard = from_node_standard, to_node_standard = to_node_standard, remove=remove, version_name=version.name, user_name=request.user.username, date_added=datetime.now())
     else:
         if LinkStandard.objects.filter(from_node_standard = from_node_standard, to_node_standard = to_node_standard).count() != 0:
             LinkStandard.objects.get(from_node_standard = from_node_standard, to_node_standard = to_node_standard).delete()
@@ -2091,3 +2155,27 @@ def apply_link_standards(request):
 
     add_backup(request, "generic")
     return HttpResponseRedirect("/links/")
+
+@login_required
+def add_category_standards(request):
+    [version, state, currentversion] = current_version(request)
+    category_codes = [i.category_code for i in Category.objects.filter(version=version)]
+    category_standards = CategoryStandard.objects.all()
+    for i in category_standards:
+        if i.code not in category_codes:
+            Category.objects.create(version=version, category_code=i.code, category_text=i.name)
+    add_backup(request, "generic")
+    return HttpResponseRedirect(state)    
+
+@login_required
+def add_node_standards(request):
+
+    [version, state, currentversion] = current_version(request)
+    existing_node_standards = list(set(list([i.node_standard for i in Node.objects.filter(version=version)])))
+    node_standards = NodeStandard.objects.all()
+    existing_category_codes = [i.category_code for i in Category.objects.filter(version=version)]
+    for i in node_standards:
+        if i.code in existing_category_codes and i not in existing_node_standards:
+            Node.objects.create(version=version, category=Category.objects.get(version=version, category_code = i.code), node_code = get_new_code(version), node_text=i.name, node_standard=i)
+    add_backup(request, "generic")
+    return HttpResponseRedirect(state)    

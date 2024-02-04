@@ -39,19 +39,22 @@
 
 {% endblock %} {% block content %}
 <div class="container">
-  <table class="table table-borderless align-middle w-auto">
+  <table class="table table-borderless align-middle">
+
+
     <th></th>
 
     {% if superuser %}
-    <th></th>
-    <th></th>
-    <th></th>
+    <th ></th>
+    <th ></th>
+    <th ></th>
     {% endif %}
-    <th></th>
-    <th></th>
-    <th scope="col" colspan="2" style="width: 400px">From node</th>
+    <th ></th>
+    <th ></th>
 
-    <th scope="col" colspan="2" style="width: 400px">To node</th>
+    <th scope="col" colspan="2" style="width: 50%">From node</th>
+    <th scope="col" colspan="2" style="width: 50%">To node</th>
+
 
     <form action="/links/" method="post" id="category_selection">
       {%csrf_token%}
@@ -114,7 +117,7 @@
 
     {% for x in links %}
     <tr id="row{{x.id}}">
-      <td>
+      <td style="padding: 0px; text-align: center">
         <form id="del{{x.id}}" onsubmit="return false;">
           <input
             type="image"
@@ -126,7 +129,7 @@
         </form>
       </td>
       {% if superuser %}
-      <td>
+      <td style="padding: 0px; text-align: center">
         <form id="standard{{x.id}}" onsubmit="return false;">
           <input
             id="linkfalse{{x.id}}"
@@ -139,7 +142,7 @@
           />
         </form>
       </td>
-      <td>
+      <td style="padding: 0px; text-align: center">
         <form id="standard{{x.id}}" onsubmit="return false;">
           <input
             id="linktrue{{x.id}}"
@@ -152,7 +155,7 @@
           />
         </form>
       </td>
-      <td>
+      <td style="padding: 0px; text-align: center">
         <form id="standard{{x.id}}" onsubmit="return false;">
           <input
             id="linkcancel{{x.id}}"
@@ -167,20 +170,18 @@
       </td>
       {% endif %}
 
-      <td style="padding-right: 0px; padding-left: 10px">
+      <td style="padding: 0px; padding-left: 8px; text-align: center">
         <!-- <form action="/switch/link/{{x.id}}"> -->
         <form method="post" id="switch">
           {% csrf_token %}
           <div
             class="form-check form-switch"
-            style="align-items: center; text-align: center"
           >
             {% if x.enabled %}
             <!-- <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" onchange=this.form.submit() checked> -->
             <!-- <input class="form-check-input" id="flexSwitchCheckDefault" type="checkbox" value="{{x.id}}" onchange=this.form.requestSubmit() checked > -->
             <input
               class="form-check-input"
-              style="align-items: center; text-align: center"
               type="checkbox"
               id="flexSwitchCheckDefault"
               value='{"id": {{x.id}}, "ob_type": "link"}'
@@ -192,7 +193,6 @@
             <!-- <input class="form-check-input" id="flexSwitchCheckDefault" type="checkbox" value="{{x.id}}" onchange=this.form.requestSubmit()> -->
             <input
               class="form-check-input"
-              style="align-items: center; text-align: center"
               type="checkbox"
               id="flexSwitchCheckDefault"
               value='{"id": {{x.id}}, "ob_type": "link"}'
@@ -203,7 +203,7 @@
         </form>
       </td>
 
-      <td>
+      <td style="padding: 0px; text-align: center">
         <form action="/edit-link/{{x.id}}" onsubmit="showPleaseWait()">
           <input
             type="image"

@@ -25,6 +25,11 @@
               >Add node</a
             >
           </li>
+          <li class="nav-item">
+            <a class="nav-link" aria-current="page" href="/add_node_standards/"
+              >Add standard nodes</a
+            >
+          </li>
           {% if standardise %}
           <li class="nav-item">
             <a class="nav-link" aria-current="page" href="/standardise_nodes/"
@@ -41,11 +46,16 @@
 {% endblock %} {% block content %}
 <div class="container">
   <table class="table table-borderless align-middle w-auto">
+    <!-- <th scope="col" style="width: 30px; text-align: center; padding: 0px"></th>
+    <th scope="col" style="width: 30px; text-align: center; padding: 0px"></th>
+    <th scope="col" style="width: 30px; text-align: center; padding: 0px"></th>
+    <th scope="col" style="width: 50px; text-align: center; padding: 0px"></th> -->
+
     <th scope="col"></th>
     <th scope="col"></th>
     <th scope="col"></th>
     <th scope="col"></th>
-    <th scope="col"></th>
+    <th scope="col" style="width: 100%"></th>
 
     <tr>
       <td></td>
@@ -81,7 +91,7 @@
     {% for x in nodes %}
 
     <tr id="row{{x.id}}">
-      <td style="padding: 0px">
+      <td style="text-align: center; padding: 0px">
         <form id="del{{x.id}}" onsubmit="return false;">
           <!-- {% csrf_token %} -->
           <!-- <input type="hidden" id="del_node" type="text" name="del_node" value={{x.id}}> -->
@@ -95,7 +105,7 @@
           />
         </form>
       </td>
-      <td style="padding-right: 0px; padding-left: 10px">
+      <td style="text-align: center; padding-left: 8px; padding-right: 0px">
         <div class="container">
           <form method="post" id="switch{{x.id}}">
             <div
@@ -127,7 +137,7 @@
         </div>
       </td>
 
-      <td style="padding: 0px">
+      <td style="text-align: center; padding: 0px">
         <form action="/edit-node/{{x.id}}" onsubmit="showPleaseWait()">
           <!-- <button type="submit" class="btn btn-secondary btn-sm">Edit</button> -->
           <input

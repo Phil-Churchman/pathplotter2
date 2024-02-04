@@ -145,4 +145,8 @@ urlpatterns = [
     path("export_version/", views.export_version, name="export_version"),
 
     path("import_version/", views.import_version, name="import_version"),
+
+    path("add_category_standards/", views.add_category_standards, name="add_category_standards"),
+
+    path("add_node_standards/", views.add_node_standards, name="add_node_standards"),
 ]

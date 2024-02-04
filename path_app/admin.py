@@ -48,9 +48,14 @@ class Duration_optionResource(resources.ModelResource):
     class Meta:
         model = Duration_option
 
+class CategoryStandardResource(resources.ModelResource):
+    class Meta:
+        model = CategoryStandard
+
+class CategoryStandardAdmin(ImportExportModelAdmin):
+    resource_classes = [CategoryStandardResource]
 
 class NodeStandardResource(resources.ModelResource):
-
     class Meta:
         model = NodeStandard
 
@@ -87,4 +92,5 @@ admin.site.register(CurrentVersion)
 admin.site.register(Grouped)
 admin.site.register(NodeStandard, NodeStandardAdmin)
 admin.site.register(LinkStandard, LinkStandardAdmin)
+admin.site.register(CategoryStandard, CategoryStandardAdmin)
 

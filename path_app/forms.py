@@ -61,6 +61,14 @@ class VersionForm(forms.ModelForm):
         else:
             self.fields['user'].queryset = User.objects.filter(username=user.username)
 
+class VersionImportForm(VersionForm):
+
+    import_standard = forms.BooleanField(initial=False, required=False)
+
+class VersionAddForm(VersionForm):
+
+    create_standard_elements = forms.BooleanField(initial=False, required=False)
+
 class VersionCopyForm(forms.ModelForm):
 
     class Meta: 
@@ -84,7 +92,6 @@ class VersionCopyForm(forms.ModelForm):
             self.fields['user'].queryset = User.objects.filter(username__in=username_list)
         else:
             self.fields['user'].queryset = User.objects.filter(username=user.username)
-
 
 class LoopForm(forms.ModelForm):
 
@@ -152,6 +159,22 @@ class NodeForm(forms.ModelForm):
         #     }
         # }
 
+    def get_code(self, version):
+        node_codes = [i.node_code for i in Node.objects.filter(version=version)]
+        alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+        counter0 = 0
+        counter1 = 0
+        while True:
+            code = alphabet[counter0] + alphabet[counter1]
+            if code in node_codes: 
+                if counter1 == len(alphabet) - 1:
+                    counter1 = 0
+                    counter0 +=1
+                else:
+                    counter1 +=1
+                continue
+            return code
+
 
     def __init__(self, *args, version, **kwargs):
     # def __init__(self, *args, **kwargs):
@@ -159,6 +182,9 @@ class NodeForm(forms.ModelForm):
         super(NodeForm, self).__init__(*args, **kwargs)
         # self.fields['version'].queryset = Version.objects.filter(id=version.id)
 
+        if "instance" not in list(kwargs.keys()):
+            self.fields['node_code'].initial = self.get_code(version)
+        
         self.fields['category'].queryset = Category.objects.filter(version=version)
         self.fields['duration'].validators.append(val_duration)
         self.fields['duration'].error_messages={"Duration needs to be greater than or equal to zero"}

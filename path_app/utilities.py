@@ -295,6 +295,22 @@ def get_loop_links(loop_list):
             links.append(loop_list[i] + "-" + loop_list[i+1])
     return links  
 
+def get_new_code(version):
+    node_codes = [i.node_code for i in Node.objects.filter(version=version)]
+    alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+    counter0 = 0
+    counter1 = 0
+    while True:
+        code = alphabet[counter0] + alphabet[counter1]
+        if code in node_codes: 
+            if counter1 == len(alphabet) - 1:
+                counter1 = 0
+                counter0 +=1
+            else:
+                counter1 +=1
+            continue
+        return code
+
 @login_required
 def create_colour_dict(request):
     [version, state, currentversion] = current_version(request)
@@ -1041,8 +1057,6 @@ def auto_layout_gantt(request):
 
     data = get_data(request)
     move_links(request, data)
-
-
 
 @login_required
 def auto_layout_links(request):

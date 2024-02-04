@@ -16,12 +16,6 @@ class Version(models.Model):
     def __str__(self):
         return f"{self.name}"
 
-class CurrentVersion(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, unique=True)
-    version = models.ForeignKey(Version, on_delete=models.CASCADE, null=True, blank=True)
-    state = models.CharField(max_length=50, default="/versions/")
-    history = PickledObjectField(null=True, blank=True)
-    gantt_buffer = PickledObjectField(null=True, blank=True)
 
 class Category(models.Model):
     version = models.ForeignKey(Version, on_delete=models.CASCADE, default="1")
@@ -40,6 +34,17 @@ class Category(models.Model):
     def __str__(self):
         return f"{self.category_code}: {self.category_text}"
 
+class CategoryStandard(models.Model):
+        
+    code = models.CharField(max_length=1)
+    name = models.CharField(max_length=200)
+    def __str__(self):
+        return f"{self.code}: {self.name}"
+
+    class Meta:
+        unique_together = ['code', 'name']
+        ordering = ["code", "name"]
+
 class NodeStandard(models.Model):
         
     code = models.CharField(max_length=1, default="B")
@@ -56,6 +61,9 @@ class LinkStandard(models.Model):
     from_node_standard = models.ForeignKey(NodeStandard, on_delete=models.CASCADE, related_name='from_node', default=None)
     to_node_standard = models.ForeignKey(NodeStandard, on_delete=models.CASCADE, related_name='to_node', default=None)
     remove = models.BooleanField(default=False)
+    version_name = models.CharField(max_length=50, null=True, blank=True)
+    user_name = models.CharField(max_length=150, null=True, blank=True)
+    date_added = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.from_node_standard.code}: {self.from_node_standard.name} to {self.to_node_standard.code}: {self.to_node_standard.name}"
@@ -336,3 +344,12 @@ class GanttParam(models.Model):
 
     def __str__(self):
         return f"{self.version}" 
+
+class CurrentVersion(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, unique=True)
+    version = models.ForeignKey(Version, on_delete=models.CASCADE, null=True, blank=True)
+    state = models.CharField(max_length=50, default="/versions/")
+    history = PickledObjectField(null=True, blank=True)
+    gantt_buffer = PickledObjectField(null=True, blank=True)
+    from_selected = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, blank=True, related_name="from_selected")
+    to_selected = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, blank=True, related_name="to_selected")

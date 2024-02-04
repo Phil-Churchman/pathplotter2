@@ -1,98 +1,143 @@
-{% extends "master.html" %}
-
-{% block title %}
-    <title>Categories</title>
-{% endblock %}
-{% block submenu %}
+{% extends "master.html" %} {% block title %}
+<title>Categories</title>
+{% endblock %} {% block submenu %}
 <div>
   <nav class="navbar navbar-expand-lg bg-light" id="network_nav">
     <div class="container-fluid">
       <a class="navbar-brand" id="sub_brand" href="#">Categories</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-
           <li class="nav-item">
-            <a class="nav-link" aria-current="page" href="/add-category/">Add category</a>
-            <!-- <a class="nav-link" aria-current="page" data-bs-toggle="offcanvas" href="#categorySidebar" role="button" aria-controls="offcanvasExample">Add category</a> -->
-          </li>      
-          
+            <a class="nav-link" aria-current="page" href="/add-category/"
+              >Add category</a
+            >
+          </li>
+          <li class="nav-item">
+            <a
+              class="nav-link"
+              aria-current="page"
+              href="/add_category_standards/"
+              >Add standard categories</a
+            >
+          </li>
         </ul>
       </div>
     </div>
   </nav>
-  </div>
-
-{% endblock %}
-{% block content %}
-<div class="container"> 
-
-<table class="table table-borderless align-middle w-auto">
-
-  <th scope="col"></th>
-  <th scope="col"></th>
-  <th scope="col"></th>
-  <th scope="col"></th>
-  <th scope="col"></th>
-
-
-{% for x in categories %}
-<tr id="row{{x.id}}">
-{% if x.editable %}
-<td style="padding:0px">
-  <form id="del{{x.id}}" onsubmit="return false;">
-
-    <input type="image" src="/static/icons/trash3.svg" value='{"id": {{x.id}}, "ob_type": "category", "backup": true}' onclick="delAJAX(this.value)" style="width:20px;height:auto;align-items:center"/>
-  </form>
-  </td>
-<td style="padding-right:0px; padding-left:10px">
-  <div class="container">
-  <form method="post" id="switch">
-  <div class="form-check form-switch">
-    {% if x.enabled %}
-    <!-- <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" onchange=this.form.submit() checked> -->
-    <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" value='{"id": {{x.id}}, "ob_type": "category"}' onchange="saveSwitch(this.value)" checked>
-    {% else %}
-    <!-- <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" onchange=this.form.submit()> -->
-    <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" value='{"id": {{x.id}}, "ob_type": "category"}' onchange="saveSwitch(this.value)">
-    {% endif %}
-  </div>
-</form>
 </div>
-</td>
 
-  <td  style="padding:0px"><form action="/edit-category/{{x.id}}" onsubmit="showPleaseWait()">
+{% endblock %} {% block content %}
+<div class="container">
+  <table class="table table-borderless align-middle w-auto">
+    <!-- <th scope="col" style="width: 30px; text-align: center; padding: 0px"></th>
+    <th scope="col" style="width: 30px; text-align: center; padding: 0px"></th>
+    <th scope="col" style="width: 30px; text-align: center; padding: 0px"></th>
+    <th scope="col" style="width: 40px; padding: 0px"></th>
+    <th scope="col" style="width: 2000px; padding: 0px"></th> -->
 
-  <input type="image" name="submit" src="/static/icons/pencil.svg" alt="Submit" style="width:20px;height:auto;align-items:center"  />
-</form></td>
+    <th scope="col"></th>
+    <th scope="col"></th>
+    <th scope="col"></th>
+    <th scope="col"></th>
+    <th scope="col"></th>
 
-{% else %}
-<td></td>
-<td></td>
-<td></td>
-{% endif %}
-<td style="padding-left:20px">
-  <a>{{x.category_code}}</a>
-</td>
+    {% for x in categories %}
+    <tr id="row{{x.id}}">
+      {% if x.editable %}
+      <td style="padding: 0px; text-align: center">
+        <form id="del{{x.id}}" onsubmit="return false;">
+          <input
+            type="image"
+            src="/static/icons/trash3.svg"
+            value='{"id": {{x.id}}, "ob_type": "category", "backup": true}'
+            onclick="delAJAX(this.value)"
+            style="width: 20px; height: auto"
+          />
+        </form>
+      </td>
+      <td style="padding-left: 8px; padding-right: 0px; text-align: center">
+        <div class="container">
+          <form method="post" id="switch">
+            <div class="form-check form-switch">
+              {% if x.enabled %}
+              <!-- <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" onchange=this.form.submit() checked> -->
+              <input
+                class="form-check-input"
+                type="checkbox"
+                id="flexSwitchCheckDefault"
+                value='{"id": {{x.id}}, "ob_type": "category"}'
+                onchange="saveSwitch(this.value)"
+                checked
+              />
+              {% else %}
+              <!-- <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" onchange=this.form.submit()> -->
+              <input
+                class="form-check-input"
+                type="checkbox"
+                id="flexSwitchCheckDefault"
+                value='{"id": {{x.id}}, "ob_type": "category"}'
+                onchange="saveSwitch(this.value)"
+              />
+              {% endif %}
+            </div>
+          </form>
+        </div>
+      </td>
 
-<td>
-  {% if x.editable %}
-  {% if x.enabled %}
-  <a  id="name{{x.id}}" class="item{{x.id}} parent" href="/edit-category/{{x.id}}">{{x.category_text}}</a>
-  {% else %}
-  <a  id="name{{x.id}}" class="item{{x.id}} parent-disabled" href="/edit-category/{{x.id}}"
-    >{{x.category_text}}</a>
-  {% endif %}
-  {% else%}
-  <a>{{x.category_text}}</a>
-  {% endif %}
-</td>
+      <td style="padding: 0px; text-align: center">
+        <form action="/edit-category/{{x.id}}" onsubmit="showPleaseWait()">
+          <input
+            type="image"
+            name="submit"
+            src="/static/icons/pencil.svg"
+            alt="Submit"
+            style="width: 20px; height: auto"
+          />
+        </form>
+      </td>
 
-</tr>
-{% endfor %}
-</table>
-<p></p>
-</div>  
+      {% else %}
+      <td></td>
+      <td></td>
+      <td></td>
+      {% endif %}
+      <td style="padding-left: 20px">
+        <a>{{x.category_code}}</a>
+      </td>
+
+      <td>
+        {% if x.editable %} {% if x.enabled %}
+        <a
+          id="name{{x.id}}"
+          class="item{{x.id}} parent"
+          href="/edit-category/{{x.id}}"
+          >{{x.category_text}}</a
+        >
+        {% else %}
+        <a
+          id="name{{x.id}}"
+          class="item{{x.id}} parent-disabled"
+          href="/edit-category/{{x.id}}"
+          >{{x.category_text}}</a
+        >
+        {% endif %} {% else%}
+        <a>{{x.category_text}}</a>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  <p></p>
+</div>
 {% endblock %}
