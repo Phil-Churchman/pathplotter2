@@ -2219,7 +2219,6 @@ def import_data(import_data, version):
        
     network_params = NetworkParam.objects.create(version=version)
     gantt_params = GanttParam.objects.create(version=version)
-    MultiParam.objects.create(user=request.user)
     objects = Category.objects.filter(version=version, category_code=">")
     if objects.count() == 0:
         Category.objects.create(version=version, category_code=">", category_text="Goals")
