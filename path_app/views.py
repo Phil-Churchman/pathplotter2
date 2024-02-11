@@ -147,22 +147,29 @@ def versions(request, **kwargs):
         check_db()
     template = loader.get_template('versions.html')
     user = request.user
-    versions = Version.objects.filter(user=user, archive=False).order_by("name")
+    versions = list(Version.objects.filter(user=user, archive=False))
     [version, state, currentversion] = current_version(request)
-    if version == None:
-        if len(versions) > 0:
-            version = list(versions)[0]
-            CurrentVersion.objects.create(user=request.user, version = version)    
-    else:
-        currentversion.version = version
-        currentversion.save()
-    # versions = list(Version.objects.filter(user=user, archive=False).order_by("name"))
-    # versions = sorted(versions,key = lambda x: x.name)
+    if len(versions) > 0:
+        if currentversion == None:
+            version = versions[0]
+            CurrentVersion.objects.create(user=user, version=version)
+            add_backup(request, "generic") 
+            return HttpResponseRedirect('/versions/')
+        elif version == None:
+            version = versions[0]
+            currentversion.delete()
+            CurrentVersion.objects.create(user=user, version=version)
+            add_backup(request, "generic")
+            return HttpResponseRedirect('/versions/')
     
-    state = "/versions/"
-    setattr(currentversion, "state", state)
-    currentversion.save()
+    # version = None
+    if currentversion != None:
+        state = "/versions/"
+        setattr(currentversion, "state", state)
+        # currentversion.save()
+
     
+
     for i in versions:
         if i == version:
             i.current = True
@@ -183,10 +190,7 @@ def versions(request, **kwargs):
         version_name = ""
 
     context = {
-    # 'form': form,
-    # 'standardise': standardise,
     'versions': versions,
-    # 'version_not_selected': not check_version_selected(version),
     'version_not_selected': len(versions) == 0,
 
     'fail_modal': fail_modal,
@@ -251,6 +255,7 @@ def nodes(request, category):
         nodes = Node.objects.filter(version=version, category=category)
     nodes = sorted(list(nodes), key=lambda x: [x.category.category_code, x.node_code])
     goals = list(filter(lambda x: x.category.category_code==">", nodes))
+    goals.reverse()
     for i in goals:
         nodes.insert(0, nodes.pop(nodes.index(i)))
 
@@ -546,6 +551,66 @@ def gantt(request, gantt_num, **kwargs):
 
     return HttpResponse(template.render(context, request))
 
+@login_required
+def versions_select(request):
+    [cur_ver, state, currentversion] = current_version(request)
+    state = "/versions_select/"
+    currentversion.state = state
+    currentversion.save()
+    template = loader.get_template('versions_select.html')
+    user = request.user
+    versions = list(Version.objects.filter(user=user, archive=False))
+
+    context = {
+    'versions': versions,
+    'height': len(versions) * 25
+
+    }
+
+    if request.method == 'POST':
+        versions = request.POST.getlist("select_version")
+        if len(versions) == 0:
+            return HttpResponse(template.render(context, request))
+        plot_data = {}
+        version_list = []
+        for i in versions:
+            version = Version.objects.get(id=i)
+            version_list.append(version.short_name)
+
+            version_data = get_node_analysis(request, "count_data", 1, i)
+            for j in version_data.keys():
+                if j not in plot_data.keys():
+                    plot_data[j] = {}
+                plot_data[j][version.short_name] = version_data[j]
+        version_list.sort()
+        key_list = list(plot_data.keys())
+        key_list.sort()
+        for i in key_list:
+            if i[0] == ">":
+                key_list.append(key_list.pop(key_list.index(i)))
+        plot_data = dict(sorted(plot_data.items(), key=lambda x: key_list.index(x[0])))
+        params = MultiParam.objects.get(user=request.user)
+
+        fields = MultiParam._meta.get_fields()
+        param_dict = {}
+        for i in list(fields):
+
+            if i.name not in ["id", "version", "copied_to", "multiparam", "user"]:
+                print(i.name)
+                param_dict[i.name] = getattr(params, i.name)
+        context = {
+            "plot_data": json.dumps(plot_data), 
+            "version_list":json.dumps(version_list),
+            "params": json.dumps(param_dict)
+            }
+        template = loader.get_template('multi_plot.html')
+
+        return HttpResponse(template.render(context, request))
+    else:
+        return HttpResponse(template.render(context, request))
+
+
+
 #delete functions
 
 @login_required
@@ -654,7 +719,6 @@ def archive_version(request, id):
         if v != "None":
             if v == version:
                 currentversion.delete()
-                CurrentVersion.objects.create(user = request.user)
         setattr(version, "archive", True)
         version.save()
         return HttpResponseRedirect("/versions/")
@@ -674,12 +738,18 @@ def archive_ajax(request):
         version=Version.objects.get(id=id)
         archived = version.archive
         if archived == False:
+            setattr(version, "archive", True)
+            version.save()
             if v != "None":
                 if v == version:
                     currentversion.delete()
-                    CurrentVersion.objects.create(user = request.user)
-            setattr(version, "archive", True)
-            version.save()
+                    return HttpResponseRedirect("/versions/")
+                    # CurrentVersion.objects.create(user = request.user)
+
+
+                    
+
+            
         else:
             setattr(version, "archive", False)
             version.save()
@@ -822,12 +892,14 @@ def edit_version(request, id):
 
 @login_required
 def edit_link(request, link_id):
+    [version, state, currentversion] = current_version(request)
+    print(state)
     try:
         if Link.objects.get(id=link_id).version.user != request.user:
-            return HttpResponseRedirect("/links/") 
+            return HttpResponseRedirect(state) 
     except:
-        return HttpResponseRedirect("/links/")        
-    [version, state, currentversion] = current_version(request)
+        return HttpResponseRedirect(state)        
+    
 
     link = Link.objects.get(id=link_id, version=version)
     if request.method == 'POST':
@@ -1005,22 +1077,25 @@ def add_version(request):
             create_standard_elements = post.get("create_standard_elements")
             if create_standard_elements == "on": create_standard_elements = True
             else: create_standard_elements = False
-            if currentversion == None:
-                CurrentVersion.objects.create(user=request.user, version=version)
-            else:
-                currentversion.version = version
-                currentversion.save()
+            if currentversion != None:
+                currentversion.delete()
+            CurrentVersion.objects.create(user=request.user, version=version)
+
+            objects = NetworkParam.objects.filter(version=version)
+            if objects.count() == 0:
+                NetworkParam.objects.create(version=version)
+            objects = GanttParam.objects.filter(version=version)
+            if objects.count() == 0:
+                GanttParam.objects.create(version=version)  
+            objects = MultiParam.objects.filter(user=request.user)
+            if objects.count() == 0:
+                MultiParam.objects.create(user=request.user)  
+
+
             objects = Category.objects.filter(version=version, category_code=">")
             if objects.count() == 0:
                 Category.objects.create(version=version, category_code=">", category_text="Goals")
-            if create_standard_elements:
-                add_category_standards(request)
-                add_node_standards(request)
-                apply_link_standards(request)
-            if NetworkParam.objects.filter(version=version).count() == 0:
-                NetworkParam.objects.create(version=version)
-            if GanttParam.objects.filter(version=version).count() == 0:
-                GanttParam.objects.create(version=version)
+            add_backup(request, "generic")
             return HttpResponseRedirect("/versions/")
         else:
             context = {}
@@ -1128,6 +1203,27 @@ def edit_gantt_params(request):
     return render(request, 'edit-gantt-params.html', context) 
 
 @login_required
+def edit_multi_params(request):
+    [version, state, currentversion] = current_version(request)
+    if MultiParam.objects.filter(user=request.user).count() == 0:
+        MultiParam.objects.create(user=request.user)
+    instance = MultiParam.objects.get(user=request.user)
+    if request.method == 'POST':
+
+        form = MultiParamForm(request.POST, instance=instance)
+        if form.is_valid():
+            form.save()
+            add_backup(request, "generic")
+
+            return HttpResponseRedirect(state)
+    else:
+        context = {}
+        context["form"] = MultiParamForm(instance=instance)
+        context["action"] = "/edit-multi-params/"
+        context["version"] = version
+    return render(request, 'edit-multi-params.html', context) 
+
+@login_required
 def edit_param(request, type, param, value):
     [version, state, currentversion] = current_version(request)
     value = value.replace("_", " ")
@@ -1189,27 +1285,24 @@ def set_version(request, id):
                 return HttpResponseRedirect("/versions/")
     version = Version.objects.get(id=id)
 
-    if CurrentVersion.objects.filter(user=request.user).count() == 0:
-        currentversion = CurrentVersion.objects.create(user=request.user, version=version)
-        currentversion.save()
-        add_backup(request, "generic")
-    # elif CurrentVersion.objects.get(user=request.user).version.id == id:
-    #     CurrentVersion.objects.get(user=request.user, version=version).delete()
-    else:
-        setattr(currentversion, "version", version)
-        currentversion.history = None
-        currentversion.save()
-        add_backup(request, "generic")
-
+    if currentversion != None:
+        currentversion.delete()
+    CurrentVersion.objects.create(user=request.user, version=version)
+    
     objects = NetworkParam.objects.filter(version=version)
     if objects.count() == 0:
         NetworkParam.objects.create(version=version)
     objects = GanttParam.objects.filter(version=version)
     if objects.count() == 0:
         GanttParam.objects.create(version=version)  
+    objects = MultiParam.objects.filter(user=request.user)
+    if objects.count() == 0:
+        MultiParam.objects.create(user=request.user)  
+    
     objects = Category.objects.filter(version=version, category_code=">")
     if objects.count() == 0:
         Category.objects.create(version=version, category_code=">", category_text="Goals")
+    add_backup(request, "generic") 
     return HttpResponseRedirect("/versions/")
 
 @login_required
@@ -1243,6 +1336,9 @@ def set_version_ajax(request):
         objects = GanttParam.objects.filter(version=version)
         if objects.count() == 0:
             GanttParam.objects.create(version=version)  
+        objects = MultiParam.objects.filter(user=request.user)
+        if objects.count() == 0:
+            MultiParam.objects.create(user=request.user)  
         objects = Category.objects.filter(version=version, category_code=">")
         if objects.count() == 0:
             Category.objects.create(version=version, category_code=">", category_text="Goals")
@@ -1266,12 +1362,11 @@ def copy_version(request, id):
         if form.is_valid():
             new_ver = form.save()
             make_copy(old_ver, new_ver)
-            if currentversion == None:
-                CurrentVersion.objects.create(user=request.user, version=new_ver)
-            else:
-                currentversion.version = new_ver
-                currentversion.save()
+            if currentversion != None:
+                currentversion.delete()
+            CurrentVersion.objects.create(user=request.user, version=new_ver)
 
+            add_backup(request, "generic")
             return HttpResponseRedirect("/versions/")
     context = {}
     form = VersionCopyForm(user=request.user, other_users=True, initial={'name': old_ver.name, "user": request.user})
@@ -1482,15 +1577,12 @@ def upload_file(request):
                 filedata = json.load(myfile)
                 version = form.save()
 
-                # if currentversion != None:
-                #     setattr(currentversion, "history", None)
-                #     currentversion.save()
-                # else:
-                # CurrentVersion.objects.create(user=request.user, version=version)
-                if CurrentVersion.objects.all().count() == 0:
-                    CurrentVersion.objects.create(user=request.user, version=version)
+                if currentversion != None:
+                    currentversion.delete()
+                CurrentVersion.objects.create(user=request.user, version=version)
+
                 import_data(filedata, version)
-                # add_backup(request, "generic")
+                add_backup(request, "generic")
                 return HttpResponseRedirect("/versions/")
 
         context = {
@@ -1670,113 +1762,8 @@ def export_links(request):
 @login_required
 def export_node_analysis(request, type, enabled):
 
-
-    return get_node_analysis(request, type, enabled)
-
-    if enabled == 1: enabled == True
-    else: enabled == False
     [version, state, currentversion] = current_version(request)
-
-    if enabled:
-        nodes = list(Node.objects.filter(version=version, enabled=True))
-        for i in list(nodes):
-            if i.category.enabled == False:
-                nodes.remove(i)
-        
-        goals = filter(lambda x: x.category.category_code == ">", nodes)
-
-        links = list(Link.objects.filter(version=version, enabled=True))
-
-    else:
-        nodes = list(Node.objects.filter(version=version))
-        
-        goals = filter(lambda x: x.category.category_code == ">", nodes)
-
-        links = list(Link.objects.filter(version=version))        
-
-    if type == "csv":
-        response = HttpResponse(
-            content_type="text/csv",
-            headers={"Content-Disposition": 'attachment; filename="node_analysis.csv"'},
-        )    
-        writer = csv.writer(response)
-        writer.writerow(["Node", "To links count", "From links count", "Dependent nodes count", "Required nodes count", "Required nodes:"])
-
-    dependent_nodes = {i: [] for i in nodes}
-
-    for i in nodes:
-        node_dict = {}
-        for j in list(filter(lambda x: x.from_node == i, links)):
-            node_dict[j.to_node] = False
-        if len(node_dict.keys()) == 0: continue
-        while True:
-            found1 = False
-            for j in list(node_dict.keys()):
-                if node_dict[j]: continue
-                if j.to_node == i: continue
-                found2 = False
-                for k in list(filter(lambda x: x.from_node == j, links)):
-                    if k.to_node == i: continue
-                    if k.to_node not in node_dict.keys():
-                        node_dict[k.to_node] = False
-                        found1 = True
-                        found2 = True
-                if found2 == False:
-                    node_dict[j] == True
-            if found1 == False: break
-        dependent_nodes[i] = list(node_dict.keys())
-
-    required_nodes = {i: [] for i in nodes}
-
-    for i in nodes:
-        node_dict = {}
-        for j in list(filter(lambda x: x.to_node == i, links)):
-            node_dict[j.from_node] = False
-        if len(node_dict.keys()) == 0: continue
-        while True:
-            found1 = False
-            for j in list(node_dict.keys()):
-                if node_dict[j]: continue
-                
-                found2 = False
-                for k in list(filter(lambda x: x.to_node == j, links)):
-                    if k.from_node == i: continue
-                    if k.from_node not in node_dict.keys():
-                        node_dict[k.from_node] = False
-                        found1 = True
-                        found2 = True
-                if found2 == False:
-                    node_dict[j] == True
-            if found1 == False: break
-        required_nodes[i] = list(node_dict.keys())
-
-    if type == "csv":
-        for i in nodes:
-            from_links_count = 0
-            to_links_count = 0
-            
-            for j in links:
-                if j.to_node == i:
-                    from_links_count +=1
-                if j.from_node == i:
-                    to_links_count +=1
-
-            writer.writerow([i.category.category_code + i.node_code + ": " + i.node_text, to_links_count, from_links_count, len(dependent_nodes[i]), len(required_nodes[i])]+sorted([j.category.category_code + j.node_code + ": " + j.node_text for j in required_nodes[i]]))
-        return response
-
-    elif type == "json":
-        data = {}
-        for i in nodes:
-            data[i.category.category_code + i.node_code + ": " + i.node_text] = {"Dependent nodes": sorted([j.category.category_code + j.node_code + ": " + j.node_text for j in dependent_nodes[i]]), "Required nodes": sorted([j.category.category_code + j.node_code + ": " + j.node_text for j in required_nodes[i]])}
-        dataset = json.dumps(data, indent=4)
-        response = HttpResponse(dataset, content_type='application/json')
-        response['Content-Disposition'] = 'attachment; filename=node_analysis.json'
-
-        return response
-    
-    else:
-
-        return {i: dependent_nodes[i] for i in nodes}
+    return get_node_analysis(request, type, enabled, version.id)
 
 @login_required
 def export_standard_nodes(request):
@@ -1911,13 +1898,8 @@ def import_version(request):
                     else:
                         import_standard = False
                     if currentversion != None:
-                        currentversion.version = version
-                        currentversion.history = None
-                        currentversion.gantt_buffer = None
-                        currentversion.save()
-                    
-                    else:
-                        CurrentVersion.objects.create(user=request.user, version=version)
+                        currentversion.delete()
+                    CurrentVersion.objects.create(user=request.user, version=version)
 
                     id_dict = {}
                     
@@ -1947,10 +1929,11 @@ def import_version(request):
                                     id_dict[(i, j["id"])] = obj
                                 else:
                                     id_dict[(i, j["id"])] = model_dict_import[i][0].objects.get(**get_dict)
+                    add_backup(request, "generic")
                 except:
                     return HttpResponseRedirect("/versions_fail/")
 
-                add_backup(request, "generic")
+                
                 return HttpResponseRedirect("/versions/")
 
         # "Node": ( Node, ["category", "version", "node_standard"], ["version", "category", "node_code"]),

@@ -70,6 +70,15 @@
         </li>
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Combined timing
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" onclick="changeParam('gantt', 'Show_combined', true); getGantt('{{gantt_data}}', '{{dep_dict}}')">Show</a></li>
+            <li><a class="dropdown-item" onclick="changeParam('gantt', 'Show_combined', false); getGantt('{{gantt_data}}', '{{dep_dict}}')">Hide</a></li>
+          </ul>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             Order
           </a>
           <ul class="dropdown-menu">

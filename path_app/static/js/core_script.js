@@ -129,7 +129,6 @@ function delAJAX(data) {
 
 function archiveAJAX(data) {
   var parsed_data = JSON.parse(data);
-  console.log(parsed_data);
   const row = document.getElementById("row" + String(parsed_data["id"]));
   row.addEventListener("click", function (event) {
     event.preventDefault();
@@ -151,7 +150,7 @@ function standardAJAX(data) {
   setTimeout(() => {
     icon.classList.toggle("standard");
     icon.classList.toggle("standard-clicked");
-  }, 500)
+  }, 500);
 }
 
 function setversionAJAX(data) {

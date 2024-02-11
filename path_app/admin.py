@@ -17,6 +17,9 @@ class LinkResource(resources.ModelResource):
 class GanttParamResource(resources.ModelResource):
     class Meta:
         model = GanttParam
+class MultiParamResource(resources.ModelResource):
+    class Meta:
+        model = MultiParam
 class NetworkParamResource(resources.ModelResource):
     class Meta:
         model = NetworkParam
@@ -87,6 +90,7 @@ admin.site.register(X_axis_option)
 admin.site.register(Timing_option)
 admin.site.register(Duration_option)
 admin.site.register(GanttParam)
+admin.site.register(MultiParam)
 admin.site.register(Version)
 admin.site.register(CurrentVersion)
 admin.site.register(Grouped)

@@ -256,11 +256,28 @@ class GanttParamForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(GanttParamForm, self).__init__(*args, **kwargs)
         for field in self.fields.keys():
-            if field in ["Show_out_seq", "Enabled_only", "Apply_groups"]:
+            if field in ["Show_out_seq", "Enabled_only", "Apply_groups", "Show_combined"]:
                 continue
             self.fields[field].widget.attrs.update({
                 'class': 'form-control',
             })
+
+class MultiParamForm(forms.ModelForm):
+    class Meta: 
+        model = MultiParam 
+        fields = '__all__'
+        exclude = ['text', 'copied_to', 'user']
+
+    def __init__(self, *args, **kwargs):
+        super(MultiParamForm, self).__init__(*args, **kwargs)
+        for field in self.fields.keys():
+            if field in ["Show_out_seq", "Enabled_only", "Apply_groups", "Show_combined"]:
+                continue
+            self.fields[field].widget.attrs.update({
+                'class': 'form-control',
+            })
+
+
 
 class GroupedForm(forms.ModelForm):
     class Meta: 

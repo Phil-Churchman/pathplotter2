@@ -52,6 +52,7 @@ urlpatterns = [
 
     path("edit-network-params/", views.edit_network_params, name="edit_network_params"),
     path("edit-gantt-params/", views.edit_gantt_params, name="edit_gantt_params"),
+    path("edit-multi-params/", views.edit_multi_params, name="edit_multi_params"),
     
     path("switch/", views.switch, name="switch"),
 
@@ -149,4 +150,7 @@ urlpatterns = [
     path("add_category_standards/", views.add_category_standards, name="add_category_standards"),
 
     path("add_node_standards/", views.add_node_standards, name="add_node_standards"),
+
+    path("versions_select/", views.versions_select, name="versions_select"),
+
 ]

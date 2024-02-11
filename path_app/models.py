@@ -6,6 +6,7 @@ from picklefield.fields import PickledObjectField
 class Version(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=50, default="default") 
+    short_name = models.CharField(max_length=50, default="default")
     number = models.IntegerField(default=1)
     archive = models.BooleanField(default=False)
 
@@ -15,7 +16,6 @@ class Version(models.Model):
 
     def __str__(self):
         return f"{self.name}"
-
 
 class Category(models.Model):
     version = models.ForeignKey(Version, on_delete=models.CASCADE, default="1")
@@ -340,10 +340,35 @@ class GanttParam(models.Model):
     Show_out_seq = models.BooleanField(default=True)
     Enabled_only = models.BooleanField(default=True)
     Apply_groups = models.BooleanField(default=True)
+    Show_combined = models.BooleanField(default=False)
     copied_to = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
         return f"{self.version}" 
+
+class MultiParam(models.Model):
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    Plot_width = models.IntegerField(null=True, blank=True, default=1000)
+    Plot_height = models.IntegerField(null=True, blank=True, default=1000)
+    Plot_padding = models.IntegerField(null=True, blank=True, default=10)
+    Internal_padding = models.IntegerField(null=True, blank=True, default=10)
+    Legend_limit = models.IntegerField(null=True, blank=True, default=0)
+    Legend_x_spacing = models.IntegerField(null=True, blank=True, default=140)
+    Legend_y_spacing = models.IntegerField(null=True, blank=True, default=30)
+    Legend_box_pad = models.IntegerField(null=True, blank=True, default=10)
+    Top_margin = models.IntegerField(null=True, blank=True, default=50)
+    Right_margin = models.IntegerField(null=True, blank=True, default=50)
+    Y_axis_space = models.IntegerField(null=True, blank=True, default=250)
+    X_axis_space = models.IntegerField(null=True, blank=True, default=50)
+    Pixels_per_row = models.IntegerField(null=True, blank=True, default=16)
+    Bar_padding = models.IntegerField(null=True, blank=True, default=3)
+    Tick_length = models.IntegerField(null=True, blank=True, default=5)
+    Enabled_only = models.BooleanField(default=True)
+    copied_to = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.user}" 
 
 class CurrentVersion(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, unique=True)

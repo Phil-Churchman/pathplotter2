@@ -98,7 +98,8 @@ gantt_lookup = {
 "Durations" : ["Durations", Duration_option],
 "Show out seq." : "Show_out_seq",
 "Enabled only" : "Enabled_only",
-"Apply groups" : "Apply_groups"
+"Apply groups" : "Apply_groups",
+"Show combined" : "Show_combined",
 }
 # node_standard = [
 # ("-",	"Not defined"),
@@ -201,7 +202,7 @@ gantt_export = [
 "Durations",
 "Show out seq.",
 "Enabled only",
-"Apply groups"
+"Apply groups",
 ]
 
 ref_models = {
@@ -1387,7 +1388,7 @@ def gantt_context(request, gantt_num, **kwargs):
     else:
         model_text = "Efficient"
     
-    dep_nodes = get_node_analysis(request, "data", params["Enabled_only"])
+    dep_nodes = get_node_analysis(request, "data", params["Enabled_only"], version.id)
     dep_dict = {}
     for i in node_id_dict.keys():
         node = Node.objects.get(id=node_id_dict[i])
@@ -2218,6 +2219,11 @@ def import_data(import_data, version):
        
     network_params = NetworkParam.objects.create(version=version)
     gantt_params = GanttParam.objects.create(version=version)
+    MultiParam.objects.create(user=request.user)
+    objects = Category.objects.filter(version=version, category_code=">")
+    if objects.count() == 0:
+        Category.objects.create(version=version, category_code=">", category_text="Goals")
+    
 
     for i in network_lookup.keys():
         if i not in network_export: continue
@@ -2398,11 +2404,11 @@ def import_link_csv(request, importfile, mincount):
 # analysis
                 
 @login_required
-def get_node_analysis(request, type, enabled):
-
-    if enabled == 1: enabled == True
-    else: enabled == False
-    [version, state, currentversion] = current_version(request)
+def get_node_analysis(request, type, enabled, version_id):
+    version = Version.objects.get(id=version_id)
+    if enabled == 1: enabled = True
+    else: enabled = False
+    # [version, state, currentversion] = current_version(request)
 
     if enabled:
         nodes = list(Node.objects.filter(version=version, enabled=True))
@@ -2413,6 +2419,9 @@ def get_node_analysis(request, type, enabled):
         goals = filter(lambda x: x.category.category_code == ">", nodes)
 
         links = list(Link.objects.filter(version=version, enabled=True))
+        for i in list(links):
+            if i.from_node not in nodes or i.to_node not in nodes:
+                links.remove(i)
 
     else:
         nodes = list(Node.objects.filter(version=version))
@@ -2501,6 +2510,9 @@ def get_node_analysis(request, type, enabled):
 
         return response
     
+    elif type == "count_data":
+        return {i.category.category_code + ": " + i.node_text: (len(required_nodes[i])/(len(nodes) - 1), len(dependent_nodes[i])/(len(nodes) - 1)) for i in nodes}
+
     else:
 
         return {i: dependent_nodes[i] for i in nodes}

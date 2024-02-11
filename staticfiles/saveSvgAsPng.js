@@ -232,7 +232,7 @@
       top = 0,
       width: w,
       height: h,
-      scale = 1,
+      scale = 2,
       responsive = false,
       excludeCss = false,
     } = options || {};
