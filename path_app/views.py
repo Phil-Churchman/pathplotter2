@@ -904,8 +904,7 @@ def edit_link(request, link_id):
         if form.is_valid():
             form.save()
             add_backup(request, "generic")
-            
-        return HttpResponseRedirect(state)
+            return HttpResponseRedirect(state)
     else:
         form = LinkForm(instance=link, version=version, initial={"version": version})
 

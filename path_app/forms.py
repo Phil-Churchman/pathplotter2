@@ -151,7 +151,9 @@ class NodeForm(forms.ModelForm):
         exclude = [
             # 'version',
             # 'xpos', 'ypos', 'placed', 
-            'copied_to', 'selected', 'connected_to_goal', "connected_to_goal_enabled", "weight", "temp"]   
+            'copied_to', 'selected', 'connected_to_goal', "connected_to_goal_enabled", 
+            # "weight",
+              "temp"]   
         widgets = {'xpos': forms.HiddenInput(), 'ypos': forms.HiddenInput(), 'placed': forms.HiddenInput(), 'version': forms.HiddenInput()}    
         # error_messages = {
         #     NON_FIELD_ERRORS: {
@@ -188,6 +190,8 @@ class NodeForm(forms.ModelForm):
         self.fields['category'].queryset = Category.objects.filter(version=version)
         self.fields['duration'].validators.append(val_duration)
         self.fields['duration'].error_messages={"Duration needs to be greater than or equal to zero"}
+        self.fields['weight'].validators.append(val_weight)
+        self.fields['weight'].error_messages={"Weight must be between 0 and 1"}        
 
 class CategoryForm(forms.ModelForm):
     class Meta:
@@ -213,7 +217,8 @@ class LinkForm(forms.ModelForm):
     class Meta: 
         model = Link 
         fields = '__all__'
-        exclude = ['xmid', 'ymid', 'in_enabled_loop', 'in_enabled_group', 'in_loop', 'in_group', "weight",
+        exclude = ['xmid', 'ymid', 'in_enabled_loop', 'in_enabled_group', 'in_loop', 'in_group',
+                    # "weight",
                     # 'version',
                       'copied_to']
         widgets = {'version': forms.HiddenInput()}
@@ -225,8 +230,8 @@ class LinkForm(forms.ModelForm):
         # self.fields['version'].queryset = Version.objects.filter(id=version.id)
         self.fields['from_node'].queryset = Node.objects.filter(version=version)
         self.fields['to_node'].queryset = Node.objects.filter(version=version)
-        # self.fields['weight'].validators.append(val_weight)
-        # self.fields['weight'].error_messages={}
+        self.fields['weight'].validators.append(val_weight)
+        self.fields['weight'].error_messages={"Weight must be between 0 and 1"}   
 
 class UploadFileForm(forms.Form):
     title = forms.CharField(max_length=50)
