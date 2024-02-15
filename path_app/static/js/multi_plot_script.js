@@ -223,8 +223,8 @@ function getMulti(plot_data, version_list, params) {
     svg.appendChild(ticktext);
   }
   additional = [
-    ["rect", "#0A42CC", "#0A42CC", "Percent of nodes required"],
-    ["rect", "#35C400", "#35C400", "Percent of nodes dependent"],
+    ["rect", "#0A42CC", "#0A42CC", "Percent of nodes on which dependent"],
+    ["rect", "#35C400", "#35C400", "Percent of nodes requiring"],
   ];
 
   legend({}, params, svg, additional);

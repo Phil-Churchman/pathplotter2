@@ -31,44 +31,39 @@ function getGantt(gantt_data, dep_dict) {
   svg.setAttribute("width", params["Plot_width"]);
   svg.setAttribute("height", params["Plot_height"]);
 
-  if (params["Show_combined"] == false) {
-    if (params["Timing"] == "Earliest") {
-      if (params["Durations"] == "With durations") {
-        var sequence = earliest_sequence_dur;
-      } else {
-        var sequence = earliest_sequence;
-      }
+
+  if (params["Timing"] == "Earliest") {
+    if (params["Durations"] == "With durations") {
+      var sequence = earliest_sequence_dur;
     } else {
-      if (params["Durations"] == "With durations") {
-        var sequence = latest_sequence_dur;
-      } else {
-        var sequence = latest_sequence;
-      }
+      var sequence = earliest_sequence;
     }
   } else {
     if (params["Durations"] == "With durations") {
-      if (params["Timing"] == "Earliest") {
-        var sequence = earliest_sequence_dur;
-        var sequence0 = latest_sequence_dur;
-      }
-      else {
-        var sequence0 = earliest_sequence_dur;
-        var sequence = latest_sequence_dur;
-      }
-
+      var sequence = latest_sequence_dur;
     } else {
-      if (params["Timing"] == "Earliest") {
-        var sequence = earliest_sequence;
-        var sequence0 = latest_sequence;
-
-      }
-      else {
-        var sequence0 = earliest_sequence;
-        var sequence = latest_sequence;
-      }
-
+      var sequence = latest_sequence;
     }
   }
+
+  if (params["Show_combined"] == true) {
+
+    if (params["Durations"] == "With durations") {
+      if (params["Timing"] == "Earliest") {
+        var sequence0 = latest_sequence_dur;
+      } else {
+        var sequence0 = earliest_sequence_dur;
+      }
+    } else {
+      if (params["Timing"] == "Earliest") {
+        var sequence0 = latest_sequence;
+      } else {
+        var sequence0 = earliest_sequence;
+      }
+    }
+  }
+
+
   var end = {};
   var x_range = 0;
   if (params["Durations"] == "With durations") {
@@ -313,6 +308,7 @@ function getGantt(gantt_data, dep_dict) {
   }
 
   if (params["Show_combined"]) {
+
     var counter = 0;
     var opacity = 0.4;
     for (let i = 0; i < gantt_items.length; i++) {

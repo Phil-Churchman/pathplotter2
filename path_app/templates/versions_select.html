@@ -27,7 +27,7 @@
 <div class="container mt-3">
   <form action="/versions_select/" method="post" id="version_selection">
     {%csrf_token%}
-    <button type="submit" class="btn btn-primary mt-3 mb-3">Save</button>
+    <button type="submit" class="btn btn-primary mt-3 mb-3">Display</button>
   </form>
 
   <select
@@ -39,7 +39,7 @@
     form="version_selection"
     style="height: {{height}}px"
   >
-    <!-- <option value="None">None selected</option> -->
+
     {% for x in versions %}
 
     <option value="{{ x.id }}">{{ x.name }}</option>

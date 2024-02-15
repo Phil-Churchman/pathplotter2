@@ -205,7 +205,7 @@ def versions(request, **kwargs):
                 currentversion.delete()
         currentversion.version = Version.objects.get(id=id)
         currentversion.save()
-        return HttpResponseRedirect(state)
+        return HttpResponseRedirect('/versions/')
 
         # return HttpResponse(template.render(context, request))
     else:
@@ -596,7 +596,6 @@ def versions_select(request):
         for i in list(fields):
 
             if i.name not in ["id", "version", "copied_to", "multiparam", "user"]:
-                print(i.name)
                 param_dict[i.name] = getattr(params, i.name)
         context = {
             "plot_data": json.dumps(plot_data), 
@@ -608,8 +607,6 @@ def versions_select(request):
         return HttpResponse(template.render(context, request))
     else:
         return HttpResponse(template.render(context, request))
-
-
 
 #delete functions
 
@@ -756,7 +753,6 @@ def archive_ajax(request):
 
     return render(request,html)  
 
-
 # edit functions
 
 @login_required
@@ -893,7 +889,6 @@ def edit_version(request, id):
 @login_required
 def edit_link(request, link_id):
     [version, state, currentversion] = current_version(request)
-    print(state)
     try:
         if Link.objects.get(id=link_id).version.user != request.user:
             return HttpResponseRedirect(state) 
@@ -1081,20 +1076,17 @@ def add_version(request):
                 currentversion.delete()
             CurrentVersion.objects.create(user=request.user, version=version)
 
-            objects = NetworkParam.objects.filter(version=version)
-            if objects.count() == 0:
-                NetworkParam.objects.create(version=version)
-            objects = GanttParam.objects.filter(version=version)
-            if objects.count() == 0:
-                GanttParam.objects.create(version=version)  
-            objects = MultiParam.objects.filter(user=request.user)
-            if objects.count() == 0:
-                MultiParam.objects.create(user=request.user)  
 
+            create_params(version, request.user)
 
             objects = Category.objects.filter(version=version, category_code=">")
             if objects.count() == 0:
                 Category.objects.create(version=version, category_code=">", category_text="Goals")
+            if create_standard_elements:
+                add_category_standards(request)
+                add_node_standards(request)
+                apply_link_standards(request)
+            
             add_backup(request, "generic")
             return HttpResponseRedirect("/versions/")
         else:
@@ -1289,15 +1281,7 @@ def set_version(request, id):
         currentversion.delete()
     CurrentVersion.objects.create(user=request.user, version=version)
     
-    objects = NetworkParam.objects.filter(version=version)
-    if objects.count() == 0:
-        NetworkParam.objects.create(version=version)
-    objects = GanttParam.objects.filter(version=version)
-    if objects.count() == 0:
-        GanttParam.objects.create(version=version)  
-    objects = MultiParam.objects.filter(user=request.user)
-    if objects.count() == 0:
-        MultiParam.objects.create(user=request.user)  
+    create_params(version, request.user)
     
     objects = Category.objects.filter(version=version, category_code=">")
     if objects.count() == 0:
@@ -1482,7 +1466,8 @@ def layout(request, type):
         auto_layout_columns(request)
         add_backup(request, "generic")
     elif type == "gantt":
-        auto_layout_gantt(request)
+        if auto_layout_gantt(request) == False:
+            return HttpResponseRedirect("/versions_gantt_error/")
         add_backup(request, "generic")
     elif type == "links":
         auto_layout_links(request)

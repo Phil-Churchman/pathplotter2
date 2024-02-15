@@ -367,6 +367,17 @@ def get_data(request):
 
     return data
 
+def create_params(version, user):
+    objects = NetworkParam.objects.filter(version=version)
+    if objects.count() == 0:
+        NetworkParam.objects.create(version=version)
+    objects = GanttParam.objects.filter(version=version)
+    if objects.count() == 0:
+        GanttParam.objects.create(version=version)  
+    objects = MultiParam.objects.filter(user=user)
+    if objects.count() == 0:
+        MultiParam.objects.create(user=user)      
+
 # Copy
 
 def make_copy(old_ver, new_ver):
@@ -795,43 +806,23 @@ def node_forces(data):
         )
     return node_forces
 
-@login_required
-def auto_layout_network(request):
-    # user = current_user()
-    # version = CurrentVersion.objects.get(user=user).version
-    [version, state, currentversion] = current_version(request)
-    if Node.objects.filter(version=version).count() == 0:
-        return
-    
-    data = get_data(request)
-    
-
-    
-    conn_nodes = connected_nodes(data)
+def layout_unconnected(data, params, conn_nodes, version):
 
     initial_spacing = 40
     nodes_per_row = (data["network_params"]["Legend_x_spacing"] + data["network_params"]["Legend_box_pad"] * 2) // initial_spacing
-
-    per_row = 1
-    y_offset = 3
-    params = NetworkParam.objects.get(version=version)
-    y_spacing = params.Legend_y_spacing
-    box_pad = params.Legend_box_pad
-
     num_items = Category.objects.filter(version=version).count()
     if params.Model_choice == "AC":
         num_items = num_items + 3
     else:
         num_items = num_items + 2
-
+    y_spacing = params.Legend_y_spacing
+    per_row = 1
+    y_offset = 3
+    box_pad = params.Legend_box_pad
     y_limit_unconnected = (math.ceil(num_items / per_row)) * y_spacing + y_offset + box_pad * 2
 
-
     counter = 0
-    margin = data["network_params"]["Target_boundary_distance"]
-    x0_limit = margin
     x_limit = data["network_params"]["Plot_width"]
-    y_limit = data["network_params"]["Plot_height"]
 
     for i in data["nodes"].keys():
         if i in conn_nodes:
@@ -841,6 +832,39 @@ def auto_layout_network(request):
         data["nodes"][i]["xpos"] = x_limit - (col + 0.5) * initial_spacing
         data["nodes"][i]["ypos"] = y_limit_unconnected + (row + 0.5) * initial_spacing 
         counter +=1
+
+@login_required
+def auto_layout_network(request):
+    # user = current_user()
+    # version = CurrentVersion.objects.get(user=user).version
+    [version, state, currentversion] = current_version(request)
+    if Node.objects.filter(version=version).count() == 0:
+        return
+    
+    data = get_data(request)
+    params = NetworkParam.objects.get(version=version)
+    conn_nodes = connected_nodes(data)
+    x_limit = data["network_params"]["Plot_width"]
+    y_limit = data["network_params"]["Plot_height"]
+    margin = data["network_params"]["Target_boundary_distance"]
+
+    # initial_spacing = 40
+    # nodes_per_row = (data["network_params"]["Legend_x_spacing"] + data["network_params"]["Legend_box_pad"] * 2) // initial_spacing
+
+    # per_row = 1
+    # y_offset = 3
+
+    # y_spacing = params.Legend_y_spacing
+    # box_pad = params.Legend_box_pad
+
+    # num_items = Category.objects.filter(version=version).count()
+    # if params.Model_choice == "AC":
+    #     num_items = num_items + 3
+    # else:
+    #     num_items = num_items + 2
+    # y_limit_unconnected = (math.ceil(num_items / per_row)) * y_spacing + y_offset + box_pad * 2
+
+    layout_unconnected(data, params, conn_nodes, version)
 
     it_counter = 0
 
@@ -974,6 +998,7 @@ def auto_layout_gantt(request):
         gantt_params.save()
 
     context = gantt_context(request, 0, **{'next': False, 'modal': False})
+    if context == False: return False
 
     [earliest_sequence, latest_sequence, earliest_sequence_dur, latest_sequence_dur, nodes_rev_dict, durations, params, colour_lookup, links_out_order, colour_ref, group_info_dict] = json.loads(context["gantt_data"])
     node_id_dict = json.loads(context["node_id_dict"])
@@ -1057,6 +1082,19 @@ def auto_layout_gantt(request):
         i.save()
 
     data = get_data(request)
+    conn_nodes = connected_nodes(data)
+    layout_unconnected(data, params, conn_nodes, version)
+    for i in Node.objects.filter(version=version):
+        i.placed = True
+        i.xpos = data["nodes"][i.id]["xpos"]
+        i.ypos = data["nodes"][i.id]["ypos"]
+        i.save()
+
+    for i in Link.objects.filter(version=version):
+        i.xmid = (i.from_node.xpos + i.to_node.xpos) / 2
+        i.ymid = (i.from_node.ypos + i.to_node.ypos) / 2
+        i.save()
+
     move_links(request, data)
 
 @login_required
@@ -2193,6 +2231,7 @@ def goal_connections(request, enabled_only):
 
 # File import / export
 
+@login_required
 def import_data(import_data, version):
     standard = list(NodeStandard.objects.filter(code="-"))[0]
     for i in import_data["nodes"].keys():
