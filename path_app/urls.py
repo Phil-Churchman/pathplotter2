@@ -153,4 +153,6 @@ urlpatterns = [
 
     path("versions_select/", views.versions_select, name="versions_select"),
 
+    path("disclaimer/", views.disclaimer, name="disclaimer"),
+
 ]

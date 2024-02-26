@@ -114,6 +114,10 @@ def signup(request):
         form = RegisterForm()
     return render(request, 'registration/signup.html', {'form':form})
 
+def disclaimer(request):
+    return render(request, 'disclaimer.html')
+
+
 @login_required
 def categories(request):
 
