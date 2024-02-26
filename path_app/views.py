@@ -582,14 +582,28 @@ def versions_select(request):
                 if j not in plot_data.keys():
                     plot_data[j] = {}
                 plot_data[j][version.short_name] = version_data[j]
+
         version_list.sort()
         key_list = list(plot_data.keys())
         key_list.sort()
-        for i in key_list:
-            if i[0] == ">":
-                key_list.append(key_list.pop(key_list.index(i)))
-        plot_data = dict(sorted(plot_data.items(), key=lambda x: key_list.index(x[0])))
+
         params = MultiParam.objects.get(user=request.user)
+        if params.Count_order == False:      
+            for i in key_list:
+                if i[0] == ">":
+                    key_list.append(key_list.pop(key_list.index(i)))
+            plot_data = dict(sorted(plot_data.items(), key=lambda x: key_list.index(x[0])))
+        else:
+            for i in key_list:
+                if i[0] == ">":
+                    key_list.insert(0, key_list.pop(key_list.index(i)))            
+            plot_data = dict(sorted(plot_data.items(), key=lambda x: [-len([i for i in x[1].keys() if i != "Aggregate"]), key_list.index(x[0])]))
+            # for i in plot_data.keys():
+            #     if i[0] == ">":
+            #         temp = plot_data[i]
+            #         del plot_data[i]
+            #         plot_data[i] = temp
+            #         break
 
         fields = MultiParam._meta.get_fields()
         param_dict = {}

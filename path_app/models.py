@@ -349,6 +349,7 @@ class GanttParam(models.Model):
 class MultiParam(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    Count_order = models.BooleanField(default=False)
     Plot_width = models.IntegerField(null=True, blank=True, default=1000)
     Plot_height = models.IntegerField(null=True, blank=True, default=1000)
     Plot_padding = models.IntegerField(null=True, blank=True, default=10)

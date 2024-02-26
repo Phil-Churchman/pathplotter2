@@ -2,12 +2,14 @@
 <script src="{% static '/js/legend_script.js' %}"></script>
 <script src="{% static '/js/multi_plot_script.js' %}"></script>
 {% endblock %} {% block title %}
-<title>Node analysis</title>
+<title>Multi-Version</title>
 {% endblock %} {% block submenu %}
 <div>
   <nav class="navbar navbar-expand-lg bg-light" id="gantt_nav">
     <div class="container-fluid">
-      <a class="navbar-brand sub-brand" id="sub_brand" href="#">Node analysis</a>
+      <a class="navbar-brand sub-brand" id="sub_brand" href="#"
+        >Multi-Version</a
+      >
       <button
         class="navbar-toggler"
         type="button"
@@ -21,14 +23,26 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <a
+              class="nav-link dropdown-toggle"
+              href="#"
+              role="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
               Other
             </a>
             <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="#" onclick="exportSVG('multi_plot')">Export image</a></li>
-            </ul>  
+              <li>
+                <a
+                  class="dropdown-item"
+                  href="#"
+                  onclick="exportSVG('multi_plot')"
+                  >Export image</a
+                >
+              </li>
+            </ul>
           </li>
         </ul>
       </div>
@@ -37,6 +51,11 @@
 </div>
 {% endblock %} {% block content %}
 
-<svg id="multi_plot" width="1000" height="1000" onload="getMulti('{{plot_data}}', '{{version_list}}', '{{params}}')"></svg>
+<svg
+  id="multi_plot"
+  width="1000"
+  height="1000"
+  onload="getMulti('{{plot_data}}', '{{version_list}}', '{{params}}')"
+></svg>
 
 {% endblock %}

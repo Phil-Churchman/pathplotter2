@@ -276,7 +276,7 @@ class MultiParamForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(MultiParamForm, self).__init__(*args, **kwargs)
         for field in self.fields.keys():
-            if field in ["Show_out_seq", "Enabled_only", "Apply_groups", "Show_combined"]:
+            if field in ["Show_out_seq", "Enabled_only", "Apply_groups", "Show_combined", "Count_order"]:
                 continue
             self.fields[field].widget.attrs.update({
                 'class': 'form-control',
